@@ -1,13 +1,23 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    const workflows: string = core.getInput('workflows')
+    if (workflows === 'all') {
+      core.debug(`Collecting stats for all workflows`)
+    } else {
+      core.debug(`Collecting stats for workflows matching: ${workflows}`)
+    }
+
+    const jobs: string = core.getInput('jobs')
+    if (jobs === 'all') {
+      core.debug(`Collecting stats for all jobs`)
+    } else {
+      core.debug(`Collecting stats for jobs matching: ${jobs}`)
+    }
 
     core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
+    await wait(parseInt(workflows, 10))
     core.debug(new Date().toTimeString())
 
     core.setOutput('time', new Date().toTimeString())

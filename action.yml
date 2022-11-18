@@ -1,11 +1,19 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'GitHub Workflow Stats'
+description: 'Get GitHub Workflow Stats'
+author: 'unstableunicorn'
 inputs:
-  milliseconds: # change this
+  token:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'github token: default {{ github.token }}'
+    default: ${{ github.token }}
+  workflows:
+    required: true
+    description: 'Enter workflow name or "all" to get all workflows, can use regex patterns'
+    default: 'all'
+  jobs:
+    required: false
+    description: 'Enter job name or "all" to get all jobs from workflow, can use regex patterns'
+    default: 'all'
 runs:
-  using: 'node16'
+  using: 'node19'
   main: 'dist/index.js'
