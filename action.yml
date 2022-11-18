@@ -15,5 +15,5 @@ inputs:
     description: 'Enter job name or "all" to get all jobs from workflow, can use regex patterns'
     default: 'all'
 runs:
-  using: 'node19'
+  using: 'node16'
   main: 'dist/index.js'

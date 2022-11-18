@@ -17,7 +17,6 @@ async function run(): Promise<void> {
     }
 
     core.debug(new Date().toTimeString())
-    await wait(parseInt(workflows, 10))
     core.debug(new Date().toTimeString())
 
     core.setOutput('time', new Date().toTimeString())
