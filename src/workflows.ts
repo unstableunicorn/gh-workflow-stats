@@ -1,10 +1,9 @@
-export async function workflows(workflows: string): Promise<string> {
+export async function getWorkflows(workflows: string): Promise<string> {
   return new Promise(resolve => {
     if (workflows === 'all') {
-      resolve("all")
+      resolve('all')
     }
 
-    console.log(workflows)
     resolve(workflows)
   })
 }

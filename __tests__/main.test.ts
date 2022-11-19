@@ -5,19 +5,18 @@ import * as wf from '../src/workflows'
 import {expect, test} from '@jest/globals'
 
 test('get workflow matching actions', async () => {
-  const workflow = "actions" 
-  const expected = workflow 
-  const result = await wf.workflows(workflow)
+  const workflow = 'actions'
+  const expected = workflow
+  const result = await wf.getWorkflows(workflow)
   await expect(result === expected)
 })
 
 test('get workflow matching all', async () => {
-  const workflow = "all" 
-  const expected = workflow 
-  const result = await wf.workflows(workflow)
+  const workflow = 'all'
+  const expected = workflow
+  const result = await wf.getWorkflows(workflow)
   await expect(result === expected)
 })
-
 
 // // shows how the runner will run a javascript action with env / stdout protocol
 // test('test runs', () => {
