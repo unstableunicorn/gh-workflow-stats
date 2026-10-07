@@ -12,14 +12,18 @@ GitHub Pages or Cloudflare Pages.
 
 | Path | What |
 |---|---|
-| `src/` | The collector Action (TypeScript). Moving to `packages/collector` |
-| `dist/` | The bundled Action, committed, as GitHub runs it from the repo |
-| `.github/workflows/` | CI: a thin wrapper over `scripts/ci.sh` |
-| `checks/` | Repo checks CI runs (secrets, comment density) |
+| `packages/core/` | The data contract (JSON schema types) and statistics, shared |
+| `packages/collector/` | The collector Action (TypeScript) |
+| `packages/collector/dist/` | The bundled Action, committed, as GitHub runs it from the repo |
+| `packages/site/` | The static dashboard: Preact, Vite and ECharts |
+| `action.yml` | The Action's contract: inputs and outputs |
+| `scripts/ci.sh` | Everything CI runs, in CI's order |
+| `.github/workflows/` | CI (a thin wrapper over `scripts/ci.sh`) and this repo's own dashboard |
+| `checks/` | Repo checks CI runs (secrets, comment density, raw HTML) |
 | `.githooks/` | Pre-commit and pre-push secret scans |
 
-The planned layout, `packages/{collector,report,site}`, arrives with the
-first slices. Don't create it ahead of the code that needs it.
+A test-report Action, `packages/report`, arrives with test history. Don't
+create a package ahead of the code that needs it.
 
 ## Getting started
 
@@ -28,7 +32,7 @@ mise install                               # Node and the check tools, from mise
 git config core.hooksPath .githooks        # secret scan before commit and push
 npm ci
 npm test
-scripts/ci.sh                              # everything CI runs, in CI's order (once it exists)
+scripts/ci.sh                              # everything CI runs, in CI's order
 ```
 
 - **Tool versions live in `mise.toml`.** CI installs the same. Don't install a
@@ -101,7 +105,7 @@ scripts/ci.sh                              # everything CI runs, in CI's order (
 
 - `action.yml` is the contract. A change to its inputs or outputs is a
   change for every user: document it in `README.md` in the same PR
-- `dist/` is built by `npm run package` and committed. CI fails when it
+- `packages/collector/dist/` is built by `npm run package` and committed. CI fails when it
   differs from a fresh build
 - Collection is **incremental**: it reads what it stored last time and
   fetches only newer runs. GitHub keeps artifacts and logs for 90 days by
