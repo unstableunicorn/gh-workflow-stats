@@ -15,9 +15,14 @@ const site = fileURLToPath(new URL('..', import.meta.url))
 const root = mkdtempSync(join(tmpdir(), 'gws-smoke-'))
 const base = join(root, 'sub', 'path')
 cpSync(join(site, 'dist'), base, {recursive: true})
+const dataBranch = join(root, 'data-branch')
 execFileSync(process.execPath, [
   join(site, 'fixtures', 'make-fixtures.mjs'),
-  join(base, 'data')
+  dataBranch
+])
+execFileSync(join(site, '..', '..', 'scripts', 'stage-site-data.sh'), [
+  dataBranch,
+  base
 ])
 
 const types = {

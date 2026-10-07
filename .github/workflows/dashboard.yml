@@ -51,10 +51,7 @@ jobs:
       - run: npm ci
       - run: npm run build:site
       - name: Add the data next to the site
-        run: |
-          mkdir -p packages/site/dist/data
-          cp site-data/summary.json packages/site/dist/data/
-          if [ -d site-data/runs ]; then cp -r site-data/runs packages/site/dist/data/; fi
+        run: scripts/stage-site-data.sh site-data packages/site/dist
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: packages/site/dist
