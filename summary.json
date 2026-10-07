@@ -1,0 +1,9 @@
+{
+ "schemaVersion": 1,
+ "repository": "unstableunicorn/gh-workflow-stats",
+ "generatedAt": "2026-10-07T07:52:55.923Z",
+ "syncedThrough": "2026-10-06T07:52:55.923Z",
+ "recentDays": 30,
+ "months": [],
+ "workflows": []
+}
