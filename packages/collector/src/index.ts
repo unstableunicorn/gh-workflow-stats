@@ -32,9 +32,13 @@ async function main(): Promise<void> {
   core.setOutput('runs-added', result.runsAdded)
   core.setOutput('complete', result.complete)
   core.setOutput('synced-through', result.syncedThrough)
-  core.info(`Collected ${result.runsAdded} runs; data complete through ${result.syncedThrough}`)
+  core.info(
+    `Collected ${result.runsAdded} runs; data complete through ${result.syncedThrough}`
+  )
   if (!result.complete)
-    core.warning(`Stopped early (${result.stoppedBy ?? 'unknown'}). The next run resumes from here.`)
+    core.warning(
+      `Stopped early (${result.stoppedBy ?? 'unknown'}). The next run resumes from here.`
+    )
   await core.summary
     .addHeading('Workflow stats collection', 3)
     .addList([

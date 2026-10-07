@@ -5,7 +5,11 @@ import {RateLimitError, sync, type SyncOptions} from './sync'
 const NOW = new Date('2026-10-07T12:00:00Z')
 const DAY = 86_400_000
 
-function apiRun(id: number, createdAt: string, extra: Partial<ApiRun> = {}): ApiRun {
+function apiRun(
+  id: number,
+  createdAt: string,
+  extra: Partial<ApiRun> = {}
+): ApiRun {
   return {
     id,
     run_attempt: 1,
@@ -47,10 +51,16 @@ function fakeApi(runs: ApiRun[], opts: {failJobsAfter?: number} = {}) {
         })
         .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
       const capped = match.slice(0, 1000)
-      return {totalCount: match.length, runs: capped.slice((page - 1) * 100, page * 100)}
+      return {
+        totalCount: match.length,
+        runs: capped.slice((page - 1) * 100, page * 100)
+      }
     },
     async listJobs(runId) {
-      if (opts.failJobsAfter !== undefined && calls.jobs.length >= opts.failJobsAfter)
+      if (
+        opts.failJobsAfter !== undefined &&
+        calls.jobs.length >= opts.failJobsAfter
+      )
         throw new RateLimitError('rate limited')
       calls.jobs.push(runId)
       return [aJob]
@@ -85,7 +95,10 @@ describe('sync', () => {
   })
 
   it('starts from the cursor and stores runs with their jobs', async () => {
-    const {api} = fakeApi([apiRun(1, '2026-10-01T00:00:00Z'), apiRun(2, '2026-10-05T00:00:00Z')])
+    const {api} = fakeApi([
+      apiRun(1, '2026-10-01T00:00:00Z'),
+      apiRun(2, '2026-10-05T00:00:00Z')
+    ])
     const result = await sync(options(api, {cursor: '2026-10-04T00:00:00Z'}))
     expect(result.runs.map(r => r.id)).toEqual([2])
     expect(result.runs[0]?.jobs.map(j => j.name)).toEqual(['build'])
@@ -99,7 +112,10 @@ describe('sync', () => {
 
   it('holds the cursor at the oldest run still in progress, and skips it', async () => {
     const {api} = fakeApi([
-      apiRun(1, '2026-10-06T09:00:00Z', {status: 'in_progress', conclusion: null}),
+      apiRun(1, '2026-10-06T09:00:00Z', {
+        status: 'in_progress',
+        conclusion: null
+      }),
       apiRun(2, '2026-10-07T10:00:00Z')
     ])
     const result = await sync(options(api, {cursor: '2026-10-06T00:00:00Z'}))
@@ -119,7 +135,9 @@ describe('sync', () => {
     const run = apiRun(1, '2026-10-05T00:00:00Z')
     const {api, calls} = fakeApi([run])
     const known = new Map([[1, {attempt: 1, updatedAt: run.updated_at}]])
-    const result = await sync(options(api, {cursor: '2026-10-04T00:00:00Z', known}))
+    const result = await sync(
+      options(api, {cursor: '2026-10-04T00:00:00Z', known})
+    )
     expect(calls.jobs).toEqual([])
     expect(result.runs).toEqual([])
   })
@@ -128,13 +146,18 @@ describe('sync', () => {
     const run = apiRun(1, '2026-10-05T00:00:00Z', {run_attempt: 2})
     const {api} = fakeApi([run])
     const known = new Map([[1, {attempt: 1, updatedAt: run.updated_at}]])
-    const result = await sync(options(api, {cursor: '2026-10-04T00:00:00Z', known}))
+    const result = await sync(
+      options(api, {cursor: '2026-10-04T00:00:00Z', known})
+    )
     expect(result.runs.map(r => r.attempt)).toEqual([2])
   })
 
   it('narrows the window when a range holds more than 1,000 runs', async () => {
     const many = Array.from({length: 1500}, (_, i) =>
-      apiRun(i + 1, new Date(Date.parse('2026-10-05T00:00:00Z') + i * 60_000).toISOString())
+      apiRun(
+        i + 1,
+        new Date(Date.parse('2026-10-05T00:00:00Z') + i * 60_000).toISOString()
+      )
     )
     const {api} = fakeApi(many)
     const result = await sync(
@@ -151,14 +174,21 @@ describe('sync', () => {
       apiRun(3, '2026-10-06T00:00:00Z')
     ]
     const first = await sync(
-      options(fakeApi(runs).api, {cursor: '2026-09-30T00:00:00Z', maxRequests: 3})
+      options(fakeApi(runs).api, {
+        cursor: '2026-09-30T00:00:00Z',
+        maxRequests: 3
+      })
     )
     expect(first.complete).toBe(false)
     expect(first.runs.map(r => r.id)).toEqual([1, 2])
     expect(first.cursor).toBe('2026-09-30T00:00:00.000Z')
 
-    const known = new Map(first.runs.map(r => [r.id, {attempt: r.attempt, updatedAt: r.updatedAt}]))
-    const second = await sync(options(fakeApi(runs).api, {cursor: first.cursor, known}))
+    const known = new Map(
+      first.runs.map(r => [r.id, {attempt: r.attempt, updatedAt: r.updatedAt}])
+    )
+    const second = await sync(
+      options(fakeApi(runs).api, {cursor: first.cursor, known})
+    )
     expect(second.runs.map(r => r.id)).toEqual([3])
     expect(second.complete).toBe(true)
   })
@@ -179,9 +209,9 @@ describe('sync', () => {
     api.listJobs = async () => {
       throw new Error('Resource not accessible by integration')
     }
-    await expect(sync(options(api, {cursor: '2026-10-04T00:00:00Z'}))).rejects.toThrow(
-      /not accessible/
-    )
+    await expect(
+      sync(options(api, {cursor: '2026-10-04T00:00:00Z'}))
+    ).rejects.toThrow(/not accessible/)
   })
 
   it('handles an empty repository', async () => {

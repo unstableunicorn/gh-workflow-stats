@@ -94,6 +94,9 @@ typings/
 .DS_Store
 Thumbs.db
 
+# Built site: deployed from CI, never committed
+packages/site/dist/
+
 # Ignore built ts files
 __tests__/runner/*
 lib/**/*

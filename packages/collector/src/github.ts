@@ -53,7 +53,11 @@ export interface DataStore {
   /** A file's content at commit `sha`, or null if it does not exist. */
   read(sha: string, path: string): Promise<string | null>
   /** Commits `files` on `parent` (null: a first, parentless commit). */
-  commit(parent: string | null, files: FileWrite[], message: string): Promise<string>
+  commit(
+    parent: string | null,
+    files: FileWrite[],
+    message: string
+  ): Promise<string>
 }
 
 /** Maps an API job to its stored form. */

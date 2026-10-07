@@ -47,11 +47,15 @@ export async function sync(opts: SyncOptions): Promise<SyncResult> {
   const collected = new Map<number, RunRecord>()
   let requests = 0
   let hold: string | null = null
-  let from = opts.cursor === null ? now - opts.backfillDays * DAY : Date.parse(opts.cursor)
+  let from =
+    opts.cursor === null
+      ? now - opts.backfillDays * DAY
+      : Date.parse(opts.cursor)
   let window = MAX_WINDOW
 
   const spend = (): void => {
-    if (requests >= opts.maxRequests) throw new Stop(`request budget of ${opts.maxRequests}`)
+    if (requests >= opts.maxRequests)
+      throw new Stop(`request budget of ${opts.maxRequests}`)
     requests++
   }
 
@@ -63,27 +67,36 @@ export async function sync(opts: SyncOptions): Promise<SyncResult> {
       const to = Math.min(from + window, now)
       const listed = await listWindow(opts.api, from, to, spend)
       if (listed === 'too-many') {
-        if (window <= MIN_WINDOW) throw new Error('More than 1,000 runs in one minute')
+        if (window <= MIN_WINDOW)
+          throw new Error('More than 1,000 runs in one minute')
         window = Math.max(MIN_WINDOW, Math.floor(window / 2))
         continue
       }
       for (const run of listed) {
         if (run.status !== 'completed') {
-          if (now - Date.parse(run.created_at) < STALE_AFTER) hold = earliest(hold, run.created_at)
+          if (now - Date.parse(run.created_at) < STALE_AFTER)
+            hold = earliest(hold, run.created_at)
           continue
         }
         const attempt = run.run_attempt ?? 1
         const seen = collected.get(run.id) ?? opts.known.get(run.id)
-        if (seen?.attempt === attempt && seen.updatedAt === run.updated_at) continue
+        if (seen?.attempt === attempt && seen.updatedAt === run.updated_at)
+          continue
         spend()
-        collected.set(run.id, toRunRecord(run, await opts.api.listJobs(run.id, attempt)))
+        collected.set(
+          run.id,
+          toRunRecord(run, await opts.api.listJobs(run.id, attempt))
+        )
       }
       from = to
       window = Math.min(MAX_WINDOW, window * 2)
     }
   } catch (error) {
     if (!(error instanceof Stop || error instanceof RateLimitError)) throw error
-    const stoppedBy = error instanceof RateLimitError ? `rate limit: ${error.message}` : error.message
+    const stoppedBy =
+      error instanceof RateLimitError
+        ? `rate limit: ${error.message}`
+        : error.message
     return {
       runs: [...collected.values()],
       cursor: earliest(hold, new Date(from).toISOString()),
@@ -113,7 +126,10 @@ async function listWindow(
     const result = await api.listRuns(created, page)
     if (result.totalCount > QUERY_CAP) return 'too-many'
     runs.push(...result.runs)
-    if (result.runs.length < PAGE_SIZE || runs.length >= result.totalCount) break
+    if (result.runs.length < PAGE_SIZE || runs.length >= result.totalCount)
+      break
   }
-  return runs.sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at))
+  return runs.sort(
+    (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at)
+  )
 }

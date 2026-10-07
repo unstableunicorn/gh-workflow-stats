@@ -31,13 +31,18 @@ export function readConfig(
   }
 
   const [owner, repo] = (env.GITHUB_REPOSITORY ?? '').split('/')
-  if (!owner || !repo) throw new Error('GITHUB_REPOSITORY is not set to owner/repo')
+  if (!owner || !repo)
+    throw new Error('GITHUB_REPOSITORY is not set to owner/repo')
 
   const dataBranch = required('data-branch')
   if (!BRANCH.test(dataBranch) || dataBranch.includes('..'))
-    throw new Error(`Input data-branch is not a plain branch name: ${JSON.stringify(dataBranch)}`)
+    throw new Error(
+      `Input data-branch is not a plain branch name: ${JSON.stringify(dataBranch)}`
+    )
   if (dataBranch === defaultBranch)
-    throw new Error(`Input data-branch must not be the default branch (${defaultBranch})`)
+    throw new Error(
+      `Input data-branch must not be the default branch (${defaultBranch})`
+    )
 
   return {
     token: required('token'),

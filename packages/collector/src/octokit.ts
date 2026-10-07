@@ -5,7 +5,10 @@ import type {ApiJob, ApiRun, DataStore, FileWrite, RunsApi} from './github'
 import {RateLimitError} from './sync'
 
 /** Octokit's `request`, narrowed to what the adapters use. */
-export type Request = (route: string, params?: Record<string, unknown>) => Promise<{data: unknown}>
+export type Request = (
+  route: string,
+  params?: Record<string, unknown>
+) => Promise<{data: unknown}>
 
 export interface Repo {
   owner: string
@@ -26,16 +29,25 @@ function statusOf(error: unknown): number | undefined {
 function explain(error: unknown, permission: string): never {
   const e = error as HttpError
   const remaining = e.response?.headers?.['x-ratelimit-remaining']
-  if (e.status === 429 || (e.status === 403 && (remaining === '0' || /rate limit/i.test(e.message ?? ''))))
+  if (
+    e.status === 429 ||
+    (e.status === 403 &&
+      (remaining === '0' || /rate limit/i.test(e.message ?? '')))
+  )
     throw new RateLimitError(e.message ?? 'rate limited')
   if (e.status === 403 || e.status === 401)
-    throw new Error(`GitHub refused the request (${e.status}): the token needs ${permission}. ${e.message ?? ''}`)
+    throw new Error(
+      `GitHub refused the request (${e.status}): the token needs ${permission}. ${e.message ?? ''}`
+    )
   throw error
 }
 
 /** Reads runs and jobs with `request`; needs `actions: read`. */
 export function octokitRunsApi(request: Request, repo: Repo): RunsApi {
-  const call = async <T>(route: string, params: Record<string, unknown>): Promise<T> => {
+  const call = async <T>(
+    route: string,
+    params: Record<string, unknown>
+  ): Promise<T> => {
     try {
       return (await request(route, {...repo, ...params})).data as T
     } catch (error) {
@@ -65,8 +77,15 @@ export function octokitRunsApi(request: Request, repo: Repo): RunsApi {
 }
 
 /** Reads and writes `branch` with `request`; needs `contents: write`. */
-export function octokitDataStore(request: Request, repo: Repo, branch: string): DataStore {
-  const call = async <T>(route: string, params: Record<string, unknown>): Promise<T> => {
+export function octokitDataStore(
+  request: Request,
+  repo: Repo,
+  branch: string
+): DataStore {
+  const call = async <T>(
+    route: string,
+    params: Record<string, unknown>
+  ): Promise<T> => {
     try {
       return (await request(route, {...repo, ...params})).data as T
     } catch (error) {
@@ -84,7 +103,10 @@ export function octokitDataStore(request: Request, repo: Repo, branch: string): 
   return {
     async head() {
       const ref = await orNull(
-        call<{object: {sha: string}}>('GET /repos/{owner}/{repo}/git/ref/{ref}', {ref: `heads/${branch}`})
+        call<{object: {sha: string}}>(
+          'GET /repos/{owner}/{repo}/git/ref/{ref}',
+          {ref: `heads/${branch}`}
+        )
       )
       return ref?.object.sha ?? null
     },
@@ -103,22 +125,39 @@ export function octokitDataStore(request: Request, repo: Repo, branch: string): 
           ? {}
           : {
               base_tree: (
-                await call<{tree: {sha: string}}>('GET /repos/{owner}/{repo}/git/commits/{commit_sha}', {
-                  commit_sha: parent
-                })
+                await call<{tree: {sha: string}}>(
+                  'GET /repos/{owner}/{repo}/git/commits/{commit_sha}',
+                  {
+                    commit_sha: parent
+                  }
+                )
               ).tree.sha
             }
-      const tree = await call<{sha: string}>('POST /repos/{owner}/{repo}/git/trees', {
-        ...base,
-        tree: files.map(f => ({path: f.path, mode: '100644', type: 'blob', content: f.content}))
-      })
-      const commit = await call<{sha: string}>('POST /repos/{owner}/{repo}/git/commits', {
-        message,
-        tree: tree.sha,
-        parents: parent === null ? [] : [parent]
-      })
+      const tree = await call<{sha: string}>(
+        'POST /repos/{owner}/{repo}/git/trees',
+        {
+          ...base,
+          tree: files.map(f => ({
+            path: f.path,
+            mode: '100644',
+            type: 'blob',
+            content: f.content
+          }))
+        }
+      )
+      const commit = await call<{sha: string}>(
+        'POST /repos/{owner}/{repo}/git/commits',
+        {
+          message,
+          tree: tree.sha,
+          parents: parent === null ? [] : [parent]
+        }
+      )
       if (parent === null)
-        await call('POST /repos/{owner}/{repo}/git/refs', {ref: `refs/heads/${branch}`, sha: commit.sha})
+        await call('POST /repos/{owner}/{repo}/git/refs', {
+          ref: `refs/heads/${branch}`,
+          sha: commit.sha
+        })
       else
         await call('PATCH /repos/{owner}/{repo}/git/refs/{ref}', {
           ref: `heads/${branch}`,

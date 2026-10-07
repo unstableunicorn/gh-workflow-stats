@@ -15,7 +15,8 @@ export default tseslint.config(
           message: 'Inject the clock: no new Date() below the wiring layer.'
         },
         {
-          selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']",
+          selector:
+            "CallExpression[callee.object.name='Date'][callee.property.name='now']",
           message: 'Inject the clock: no Date.now() below the wiring layer.'
         }
       ]

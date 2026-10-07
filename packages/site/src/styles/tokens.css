@@ -1,0 +1,36 @@
+/* Design tokens: every colour and size the site uses, light and dark. */
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #f6f8fa;
+  --color-text: #1f2328;
+  --color-muted: #59636e;
+  --color-border: #d1d9e0;
+  --color-accent: #0969da;
+  --color-success: #1a7f37;
+  --color-failure: #cf222e;
+  --color-other: #8c959f;
+  --color-warning-bg: #fff8c5;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 1.5rem;
+  --radius: 6px;
+  --font: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --chart-height: 320px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0d1117;
+    --color-surface: #151b23;
+    --color-text: #f0f6fc;
+    --color-muted: #9198a1;
+    --color-border: #3d444d;
+    --color-accent: #4493f8;
+    --color-success: #3fb950;
+    --color-failure: #f85149;
+    --color-other: #9198a1;
+    --color-warning-bg: #3b2e00;
+  }
+}

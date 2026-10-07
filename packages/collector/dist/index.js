@@ -24506,7 +24506,11 @@ var paths = {
 };
 
 // ../core/src/stats.ts
-var FAILED = /* @__PURE__ */ new Set(["failure", "timed_out", "startup_failure"]);
+var FAILED_CONCLUSIONS = /* @__PURE__ */ new Set([
+  "failure",
+  "timed_out",
+  "startup_failure"
+]);
 function percentile(values, p) {
   if (values.length === 0) return null;
   const sorted = [...values].sort((a, b) => a - b);
@@ -24529,7 +24533,9 @@ function present(values) {
 }
 function runStats(runs) {
   const success = runs.filter((r) => r.conclusion === "success").length;
-  const failure = runs.filter((r) => FAILED.has(r.conclusion ?? "")).length;
+  const failure = runs.filter(
+    (r) => FAILED_CONCLUSIONS.has(r.conclusion ?? "")
+  ).length;
   const durations = present(runs.map(runDurationMs));
   const queues = present(runs.flatMap((r) => r.jobs.map(jobQueueMs)));
   return {
@@ -24609,7 +24615,8 @@ async function sync(opts) {
   let from = opts.cursor === null ? now - opts.backfillDays * DAY : Date.parse(opts.cursor);
   let window = MAX_WINDOW;
   const spend = () => {
-    if (requests >= opts.maxRequests) throw new Stop(`request budget of ${opts.maxRequests}`);
+    if (requests >= opts.maxRequests)
+      throw new Stop(`request budget of ${opts.maxRequests}`);
     requests++;
   };
   const earliest = (a, b) => a !== null && Date.parse(a) <= Date.parse(b) ? a : b;
@@ -24618,20 +24625,26 @@ async function sync(opts) {
       const to = Math.min(from + window, now);
       const listed = await listWindow(opts.api, from, to, spend);
       if (listed === "too-many") {
-        if (window <= MIN_WINDOW) throw new Error("More than 1,000 runs in one minute");
+        if (window <= MIN_WINDOW)
+          throw new Error("More than 1,000 runs in one minute");
         window = Math.max(MIN_WINDOW, Math.floor(window / 2));
         continue;
       }
       for (const run of listed) {
         if (run.status !== "completed") {
-          if (now - Date.parse(run.created_at) < STALE_AFTER) hold = earliest(hold, run.created_at);
+          if (now - Date.parse(run.created_at) < STALE_AFTER)
+            hold = earliest(hold, run.created_at);
           continue;
         }
         const attempt = run.run_attempt ?? 1;
         const seen = collected.get(run.id) ?? opts.known.get(run.id);
-        if (seen?.attempt === attempt && seen.updatedAt === run.updated_at) continue;
+        if (seen?.attempt === attempt && seen.updatedAt === run.updated_at)
+          continue;
         spend();
-        collected.set(run.id, toRunRecord(run, await opts.api.listJobs(run.id, attempt)));
+        collected.set(
+          run.id,
+          toRunRecord(run, await opts.api.listJobs(run.id, attempt))
+        );
       }
       from = to;
       window = Math.min(MAX_WINDOW, window * 2);
@@ -24660,9 +24673,12 @@ async function listWindow(api, from, to, spend) {
     const result = await api.listRuns(created, page);
     if (result.totalCount > QUERY_CAP) return "too-many";
     runs.push(...result.runs);
-    if (result.runs.length < PAGE_SIZE || runs.length >= result.totalCount) break;
+    if (result.runs.length < PAGE_SIZE || runs.length >= result.totalCount)
+      break;
   }
-  return runs.sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+  return runs.sort(
+    (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at)
+  );
 }
 
 // src/collect.ts
@@ -24677,13 +24693,20 @@ async function collect(api, store, now, config) {
     );
   const previous = await readJson(paths.summary);
   const syncFrom = state?.cursor ?? new Date(now.getTime() - config.backfillDays * DAY2).toISOString();
-  const recentFrom = new Date(now.getTime() - config.recentDays * DAY2).toISOString();
-  const firstMonth = monthOf(Date.parse(syncFrom) < Date.parse(recentFrom) ? syncFrom : recentFrom);
+  const recentFrom = new Date(
+    now.getTime() - config.recentDays * DAY2
+  ).toISOString();
+  const firstMonth = monthOf(
+    Date.parse(syncFrom) < Date.parse(recentFrom) ? syncFrom : recentFrom
+  );
   const shards = /* @__PURE__ */ new Map();
   for (const month of previous?.months ?? []) {
     if (month < firstMonth) continue;
     const shard = await readJson(paths.shard(month));
-    if (shard === null) throw new Error(`${paths.shard(month)} is listed in the summary but missing`);
+    if (shard === null)
+      throw new Error(
+        `${paths.shard(month)} is listed in the summary but missing`
+      );
     shards.set(month, shard);
   }
   const stored = [...shards.values()].flatMap((s) => s.runs);
@@ -24691,7 +24714,9 @@ async function collect(api, store, now, config) {
     api,
     now,
     cursor: state?.cursor ?? null,
-    known: new Map(stored.map((r) => [r.id, { attempt: r.attempt, updatedAt: r.updatedAt }])),
+    known: new Map(
+      stored.map((r) => [r.id, { attempt: r.attempt, updatedAt: r.updatedAt }])
+    ),
     backfillDays: config.backfillDays,
     maxRequests: config.maxRequests
   });
@@ -24701,10 +24726,16 @@ async function collect(api, store, now, config) {
     ...result.stoppedBy === void 0 ? {} : { stoppedBy: result.stoppedBy },
     syncedThrough: result.cursor
   };
-  if (result.runs.length === 0 && head !== null) return { ...outcome, commit: null };
+  if (result.runs.length === 0 && head !== null)
+    return { ...outcome, commit: null };
   const touched = mergeRuns(shards, result.runs);
-  const months = [.../* @__PURE__ */ new Set([...previous?.months ?? [], ...shards.keys()])].sort();
-  const recent = filterRuns([...shards.values()].flatMap((s) => s.runs), { from: recentFrom });
+  const months = [
+    .../* @__PURE__ */ new Set([...previous?.months ?? [], ...shards.keys()])
+  ].sort();
+  const recent = filterRuns(
+    [...shards.values()].flatMap((s) => s.runs),
+    { from: recentFrom }
+  );
   const summary2 = {
     schemaVersion: SCHEMA_VERSION,
     repository: config.repository,
@@ -24714,20 +24745,34 @@ async function collect(api, store, now, config) {
     months,
     workflows: summariseWorkflows(previous?.workflows ?? [], recent)
   };
-  const newState = { schemaVersion: SCHEMA_VERSION, cursor: result.cursor };
+  const newState = {
+    schemaVersion: SCHEMA_VERSION,
+    cursor: result.cursor
+  };
   const files = [
-    ...touched.map((m) => ({ path: paths.shard(m), content: toJson(shards.get(m)) })),
+    ...touched.map((m) => ({
+      path: paths.shard(m),
+      content: toJson(shards.get(m))
+    })),
     { path: paths.state, content: toJson(newState) },
     { path: paths.summary, content: toJson(summary2) }
   ];
-  const commit = await store.commit(head, files, `Collect ${result.runs.length} workflow runs`);
+  const commit = await store.commit(
+    head,
+    files,
+    `Collect ${result.runs.length} workflow runs`
+  );
   return { ...outcome, commit };
 }
 function mergeRuns(shards, runs) {
   const touched = /* @__PURE__ */ new Set();
   for (const run of runs) {
     const month = monthOf(run.createdAt);
-    const shard = shards.get(month) ?? { schemaVersion: SCHEMA_VERSION, month, runs: [] };
+    const shard = shards.get(month) ?? {
+      schemaVersion: SCHEMA_VERSION,
+      month,
+      runs: []
+    };
     shard.runs = [...shard.runs.filter((r) => r.id !== run.id), run].sort(
       (a, b) => a.createdAt.localeCompare(b.createdAt)
     );
@@ -24738,8 +24783,13 @@ function mergeRuns(shards, runs) {
 }
 function summariseWorkflows(previous, recent) {
   const named = new Map(previous.map((w) => [w.id, { name: w.name, path: w.path }]));
-  for (const r of recent) named.set(r.workflowId, { name: r.workflowName, path: r.workflowPath });
-  return [...named.entries()].map(([id, w]) => ({ id, ...w, recent: runStats(recent.filter((r) => r.workflowId === id)) })).sort((a, b) => a.name.localeCompare(b.name));
+  for (const r of recent)
+    named.set(r.workflowId, { name: r.workflowName, path: r.workflowPath });
+  return [...named.entries()].map(([id, w]) => ({
+    id,
+    ...w,
+    recent: runStats(recent.filter((r) => r.workflowId === id))
+  })).sort((a, b) => a.name.localeCompare(b.name));
 }
 function parseData(path, text) {
   if (text === null) return null;
@@ -24747,7 +24797,10 @@ function parseData(path, text) {
   try {
     data = JSON.parse(text);
   } catch (error2) {
-    throw new Error(`${path} on the data branch is not valid JSON: ${String(error2)}`);
+    throw new Error(
+      `${path} on the data branch is not valid JSON: ${String(error2)}`,
+      { cause: error2 }
+    );
   }
   const version = data?.schemaVersion;
   if (version !== SCHEMA_VERSION)
@@ -24776,12 +24829,17 @@ function readConfig(input, env, defaultBranch) {
     return value;
   };
   const [owner, repo] = (env.GITHUB_REPOSITORY ?? "").split("/");
-  if (!owner || !repo) throw new Error("GITHUB_REPOSITORY is not set to owner/repo");
+  if (!owner || !repo)
+    throw new Error("GITHUB_REPOSITORY is not set to owner/repo");
   const dataBranch = required("data-branch");
   if (!BRANCH.test(dataBranch) || dataBranch.includes(".."))
-    throw new Error(`Input data-branch is not a plain branch name: ${JSON.stringify(dataBranch)}`);
+    throw new Error(
+      `Input data-branch is not a plain branch name: ${JSON.stringify(dataBranch)}`
+    );
   if (dataBranch === defaultBranch)
-    throw new Error(`Input data-branch must not be the default branch (${defaultBranch})`);
+    throw new Error(
+      `Input data-branch must not be the default branch (${defaultBranch})`
+    );
   return {
     token: required("token"),
     owner,
@@ -24803,7 +24861,9 @@ function explain(error2, permission) {
   if (e.status === 429 || e.status === 403 && (remaining === "0" || /rate limit/i.test(e.message ?? "")))
     throw new RateLimitError(e.message ?? "rate limited");
   if (e.status === 403 || e.status === 401)
-    throw new Error(`GitHub refused the request (${e.status}): the token needs ${permission}. ${e.message ?? ""}`);
+    throw new Error(
+      `GitHub refused the request (${e.status}): the token needs ${permission}. ${e.message ?? ""}`
+    );
   throw error2;
 }
 function octokitRunsApi(request2, repo) {
@@ -24854,7 +24914,10 @@ function octokitDataStore(request2, repo, branch) {
   return {
     async head() {
       const ref = await orNull(
-        call("GET /repos/{owner}/{repo}/git/ref/{ref}", { ref: `heads/${branch}` })
+        call(
+          "GET /repos/{owner}/{repo}/git/ref/{ref}",
+          { ref: `heads/${branch}` }
+        )
       );
       return ref?.object.sha ?? null;
     },
@@ -24869,21 +24932,38 @@ function octokitDataStore(request2, repo, branch) {
     },
     async commit(parent, files, message) {
       const base = parent === null ? {} : {
-        base_tree: (await call("GET /repos/{owner}/{repo}/git/commits/{commit_sha}", {
-          commit_sha: parent
-        })).tree.sha
+        base_tree: (await call(
+          "GET /repos/{owner}/{repo}/git/commits/{commit_sha}",
+          {
+            commit_sha: parent
+          }
+        )).tree.sha
       };
-      const tree = await call("POST /repos/{owner}/{repo}/git/trees", {
-        ...base,
-        tree: files.map((f) => ({ path: f.path, mode: "100644", type: "blob", content: f.content }))
-      });
-      const commit = await call("POST /repos/{owner}/{repo}/git/commits", {
-        message,
-        tree: tree.sha,
-        parents: parent === null ? [] : [parent]
-      });
+      const tree = await call(
+        "POST /repos/{owner}/{repo}/git/trees",
+        {
+          ...base,
+          tree: files.map((f) => ({
+            path: f.path,
+            mode: "100644",
+            type: "blob",
+            content: f.content
+          }))
+        }
+      );
+      const commit = await call(
+        "POST /repos/{owner}/{repo}/git/commits",
+        {
+          message,
+          tree: tree.sha,
+          parents: parent === null ? [] : [parent]
+        }
+      );
       if (parent === null)
-        await call("POST /repos/{owner}/{repo}/git/refs", { ref: `refs/heads/${branch}`, sha: commit.sha });
+        await call("POST /repos/{owner}/{repo}/git/refs", {
+          ref: `refs/heads/${branch}`,
+          sha: commit.sha
+        });
       else
         await call("PATCH /repos/{owner}/{repo}/git/refs/{ref}", {
           ref: `heads/${branch}`,
@@ -24918,9 +24998,13 @@ async function main() {
   setOutput("runs-added", result.runsAdded);
   setOutput("complete", result.complete);
   setOutput("synced-through", result.syncedThrough);
-  info(`Collected ${result.runsAdded} runs; data complete through ${result.syncedThrough}`);
+  info(
+    `Collected ${result.runsAdded} runs; data complete through ${result.syncedThrough}`
+  );
   if (!result.complete)
-    warning(`Stopped early (${result.stoppedBy ?? "unknown"}). The next run resumes from here.`);
+    warning(
+      `Stopped early (${result.stoppedBy ?? "unknown"}). The next run resumes from here.`
+    );
   await summary.addHeading("Workflow stats collection", 3).addList([
     `Runs added: ${result.runsAdded}`,
     `Data complete through: ${result.syncedThrough}`,

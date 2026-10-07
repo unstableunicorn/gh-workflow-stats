@@ -1,0 +1,21 @@
+/* Chart container and its text tooltip. */
+.chart {
+  width: 100%;
+  height: var(--chart-height);
+}
+
+.chart-tooltip {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0 var(--space-2);
+  margin: 0;
+}
+
+.chart-tooltip dt {
+  color: var(--color-muted);
+}
+
+.chart-tooltip dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

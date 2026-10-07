@@ -60,9 +60,7 @@ describe('runDurationMs', () => {
   })
 
   it('is null when the times are out of order', () => {
-    expect(
-      runDurationMs(run({updatedAt: '2026-10-01T09:00:00Z'}))
-    ).toBeNull()
+    expect(runDurationMs(run({updatedAt: '2026-10-01T09:00:00Z'}))).toBeNull()
   })
 })
 

@@ -3,7 +3,12 @@
 
 import type {JobRecord, RunRecord, RunStats} from './schema'
 
-const FAILED = new Set(['failure', 'timed_out', 'startup_failure'])
+/** Conclusions that count as a failed run. */
+export const FAILED_CONCLUSIONS: ReadonlySet<string> = new Set([
+  'failure',
+  'timed_out',
+  'startup_failure'
+])
 
 /** The nearest-rank percentile `p` (0–100) of `values`, or null if empty. */
 export function percentile(values: number[], p: number): number | null {
@@ -41,7 +46,9 @@ function present(values: (number | null)[]): number[] {
 /** Headline numbers; cancelled and skipped runs count neither way. */
 export function runStats(runs: RunRecord[]): RunStats {
   const success = runs.filter(r => r.conclusion === 'success').length
-  const failure = runs.filter(r => FAILED.has(r.conclusion ?? '')).length
+  const failure = runs.filter(r =>
+    FAILED_CONCLUSIONS.has(r.conclusion ?? '')
+  ).length
   const durations = present(runs.map(runDurationMs))
   const queues = present(runs.flatMap(r => r.jobs.map(jobQueueMs)))
   return {
