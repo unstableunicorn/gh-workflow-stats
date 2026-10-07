@@ -3,6 +3,8 @@
 import {useEffect, useState} from 'preact/hooks'
 import type {Summary} from '@gh-workflow-stats/core'
 import {Overview} from './Overview'
+import {TestPage} from './TestPage'
+import {TestsPage} from './TestsPage'
 import {WorkflowPage} from './WorkflowPage'
 import {loadSummary, type FetchJson} from '../lib/data'
 import {freshness} from '../lib/freshness'
@@ -42,6 +44,10 @@ export function App({fetchJson, now}: Props) {
           <a href="#/">Workflow stats</a>
         </h1>
         {summary !== null && <p class="muted">{summary.repository}</p>}
+        <nav aria-label="Sections">
+          <a href="#/">Workflows</a>
+          {summary?.tests !== undefined && <a href="#/tests">Tests</a>}
+        </nav>
       </header>
       <main>
         {error !== null && <p class="notice">{error}</p>}
@@ -67,6 +73,22 @@ export function App({fetchJson, now}: Props) {
         )}
         {summary !== null && route.view === 'workflow' && (
           <WorkflowPage
+            route={route}
+            summary={summary}
+            fetchJson={fetchJson}
+            now={now}
+          />
+        )}
+        {summary !== null && route.view === 'tests' && (
+          <TestsPage
+            route={route}
+            summary={summary}
+            fetchJson={fetchJson}
+            now={now}
+          />
+        )}
+        {summary !== null && route.view === 'test' && (
+          <TestPage
             route={route}
             summary={summary}
             fetchJson={fetchJson}

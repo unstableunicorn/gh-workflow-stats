@@ -38,6 +38,35 @@ describe('parseRoute', () => {
   })
 })
 
+describe('test routes', () => {
+  it('reads the tests view with its filters', () => {
+    expect(parseRoute('#/tests?suite=unit&days=7')).toEqual({
+      view: 'tests',
+      suite: 'unit',
+      days: 7
+    })
+  })
+
+  it('reads one test by its key', () => {
+    expect(parseRoute('#/test?key=unit%3A%3Apkg%3A%3Aa%20b')).toEqual({
+      view: 'test',
+      key: 'unit::pkg::a b',
+      days: 30
+    })
+  })
+
+  it('treats a test view without a key as not found', () => {
+    expect(parseRoute('#/test')).toEqual({view: 'not-found'})
+  })
+
+  it('round-trips test routes', () => {
+    const tests = {view: 'tests', suite: 'e2e', days: 90} as const
+    const test = {view: 'test', key: 'unit::a&b=c?#', days: 'all'} as const
+    expect(parseRoute(formatRoute(tests))).toEqual(tests)
+    expect(parseRoute(formatRoute(test))).toEqual(test)
+  })
+})
+
 describe('formatRoute', () => {
   it('round-trips a workflow route', () => {
     const route = {view: 'workflow', id: 9, branch: 'a b&c', days: 90} as const

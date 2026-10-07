@@ -4,9 +4,11 @@ import {
   SCHEMA_VERSION,
   monthOf,
   paths,
+  testPaths,
   type RunRecord,
   type RunShard,
-  type Summary
+  type Summary,
+  type TestShard
 } from '@gh-workflow-stats/core'
 import type {Days} from './route'
 
@@ -68,4 +70,17 @@ export async function loadRuns(
     })
   )
   return shards.flatMap(s => s.runs)
+}
+
+/** Loads the given months of test results. */
+export async function loadTestShards(
+  fetchJson: FetchJson,
+  months: string[]
+): Promise<TestShard[]> {
+  return Promise.all(
+    months.map(async m => {
+      const path = DATA_DIR + testPaths.shard(m)
+      return checkVersion<TestShard>(path, await fetchJson(path))
+    })
+  )
 }

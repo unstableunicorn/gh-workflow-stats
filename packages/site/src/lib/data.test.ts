@@ -1,5 +1,11 @@
 import {describe, expect, it} from 'vitest'
-import {loadRuns, loadSummary, monthsToLoad, rangeFor} from './data'
+import {
+  loadRuns,
+  loadSummary,
+  loadTestShards,
+  monthsToLoad,
+  rangeFor
+} from './data'
 
 const NOW = new Date('2026-10-07T12:00:00Z')
 
@@ -66,5 +72,25 @@ describe('loadRuns', () => {
     const runs = await loadRuns(fetchJson, ['2026-09', '2026-10'])
     expect(runs.map(r => r.id)).toEqual([1, 2])
     expect(asked).toEqual(['data/runs/2026-09.json', 'data/runs/2026-10.json'])
+  })
+})
+
+describe('loadTestShards', () => {
+  it('fetches each month of test results', async () => {
+    const {fetchJson, asked} = fakeFetch({
+      'data/tests/2026-10.json': {schemaVersion: 1, month: '2026-10', runs: []}
+    })
+    const shards = await loadTestShards(fetchJson, ['2026-10'])
+    expect(shards.map(s => s.month)).toEqual(['2026-10'])
+    expect(asked).toEqual(['data/tests/2026-10.json'])
+  })
+
+  it('explains a shard from another schema version', async () => {
+    const {fetchJson} = fakeFetch({
+      'data/tests/2026-10.json': {schemaVersion: 9}
+    })
+    await expect(loadTestShards(fetchJson, ['2026-10'])).rejects.toThrow(
+      /version 9/
+    )
   })
 })

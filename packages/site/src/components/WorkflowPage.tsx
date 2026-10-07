@@ -4,6 +4,7 @@
 import {useEffect, useMemo, useState} from 'preact/hooks'
 import type {RunRecord, Summary} from '@gh-workflow-stats/core'
 import {Chart} from './Chart'
+import {PeriodSelect} from './PeriodSelect'
 import {
   dailyChart,
   dailyTooltipRows,
@@ -13,7 +14,7 @@ import {
 } from '../lib/charts'
 import {loadRuns, monthsToLoad, rangeFor, type FetchJson} from '../lib/data'
 import {formatDuration, formatPercent, runUrl} from '../lib/format'
-import {DAY_CHOICES, formatRoute, type Days, type Route} from '../lib/route'
+import {formatRoute, type Route} from '../lib/route'
 import {durationPoints, workflowView} from '../lib/workflow'
 import {readTheme} from '../theme'
 import './workflow.css'
@@ -120,25 +121,7 @@ export function WorkflowPage({route, summary, fetchJson, now}: Props) {
             ))}
           </select>
         </label>
-        <label>
-          Period{' '}
-          <select
-            value={String(route.days)}
-            onChange={e =>
-              navigate({
-                days: DAY_CHOICES.find(
-                  d => String(d) === e.currentTarget.value
-                ) as Days
-              })
-            }
-          >
-            {DAY_CHOICES.map(d => (
-              <option key={d} value={String(d)}>
-                {d === 'all' ? 'All history' : `Last ${d} days`}
-              </option>
-            ))}
-          </select>
-        </label>
+        <PeriodSelect value={route.days} onChange={days => navigate({days})} />
       </form>
 
       {error !== null && <p class="notice">Could not load runs: {error}</p>}

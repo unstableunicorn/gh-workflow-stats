@@ -128,3 +128,6 @@ credentials.json
 .idea/
 .vscode/
 *.swp
+
+# Test reports written by npm test
+reports/

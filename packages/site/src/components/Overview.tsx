@@ -9,6 +9,59 @@ export function Overview({summary}: {summary: Summary}) {
     return <p>No completed workflow runs have been collected yet.</p>
 
   return (
+    <>
+      <WorkflowsTable summary={summary} />
+      {summary.tests !== undefined && <SuitesTable summary={summary} />}
+    </>
+  )
+}
+
+function SuitesTable({summary}: {summary: Summary}) {
+  return (
+    <div class="table-scroll">
+      <table>
+        <caption>Test suites over the last {summary.recentDays} days</caption>
+        <thead>
+          <tr>
+            <th scope="col">Suite</th>
+            <th scope="col" class="num">
+              Reports
+            </th>
+            <th scope="col" class="num">
+              Tests
+            </th>
+            <th scope="col" class="num">
+              Failures
+            </th>
+            <th scope="col" class="num">
+              Flaky tests
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {(summary.tests?.suites ?? []).map(s => (
+            <tr key={s.suite}>
+              <th scope="row">
+                <a
+                  href={formatRoute({view: 'tests', suite: s.suite, days: 30})}
+                >
+                  {s.suite}
+                </a>
+              </th>
+              <td class="num">{s.recent.reports}</td>
+              <td class="num">{s.recent.tests}</td>
+              <td class="num">{s.recent.failures}</td>
+              <td class="num">{s.recent.flaky}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function WorkflowsTable({summary}: {summary: Summary}) {
+  return (
     <div class="table-scroll">
       <table>
         <caption>Workflows over the last {summary.recentDays} days</caption>

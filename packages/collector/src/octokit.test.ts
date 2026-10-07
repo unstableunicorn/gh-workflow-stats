@@ -190,23 +190,35 @@ describe('octokitArtifactsApi', () => {
         }))
       })
     })
-    const list = await octokitArtifactsApi(request, repo, noDownload).listArtifacts(9)
+    const list = await octokitArtifactsApi(
+      request,
+      repo,
+      noDownload
+    ).listArtifacts(9)
     expect(list).toHaveLength(101)
     expect(calls[0]?.params).toMatchObject({run_id: 9, per_page: 100, page: 1})
   })
 
   it('reads the single file the download writes', async () => {
-    const api = octokitArtifactsApi(fakeRequest({}).request, repo, async (id, runId, dir) => {
-      await writeFile(join(dir, `report-${id}-${runId}.json`), '{"ok":1}')
-    })
+    const api = octokitArtifactsApi(
+      fakeRequest({}).request,
+      repo,
+      async (id, runId, dir) => {
+        await writeFile(join(dir, `report-${id}-${runId}.json`), '{"ok":1}')
+      }
+    )
     expect(await api.downloadText(3, 9)).toBe('{"ok":1}')
   })
 
   it('refuses a download that is not exactly one file', async () => {
-    const api = octokitArtifactsApi(fakeRequest({}).request, repo, async (_id, _run, dir) => {
-      await writeFile(join(dir, 'a.json'), '{}')
-      await writeFile(join(dir, 'b.json'), '{}')
-    })
+    const api = octokitArtifactsApi(
+      fakeRequest({}).request,
+      repo,
+      async (_id, _run, dir) => {
+        await writeFile(join(dir, 'a.json'), '{}')
+        await writeFile(join(dir, 'b.json'), '{}')
+      }
+    )
     await expect(api.downloadText(3, 9)).rejects.toThrow(/2 files/)
   })
 
@@ -214,8 +226,8 @@ describe('octokitArtifactsApi', () => {
     const request: Request = async () => {
       throw httpError(403, {'x-ratelimit-remaining': '900'})
     }
-    await expect(octokitArtifactsApi(request, repo, noDownload).listArtifacts(9)).rejects.toThrow(
-      /actions: read/
-    )
+    await expect(
+      octokitArtifactsApi(request, repo, noDownload).listArtifacts(9)
+    ).rejects.toThrow(/actions: read/)
   })
 })

@@ -31,3 +31,9 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: scripts/ci.sh
+      - name: Report test results
+        if: ${{ !cancelled() && hashFiles('reports/vitest.xml') != '' }}
+        uses: ./report # zizmor: ignore[self-repository] actionlint cannot parse $/ yet
+        with:
+          path: reports/vitest.xml
+          suite: unit
