@@ -1,0 +1,34 @@
+name: GitHub workflow stats
+description: Collect workflow runs into a data branch for a static CI health dashboard
+author: unstableunicorn
+branding:
+  icon: bar-chart-2
+  color: blue
+inputs:
+  token:
+    description: >-
+      Token to read runs and write the data branch. Needs `actions: read`
+      and `contents: write`.
+    default: ${{ github.token }}
+  data-branch:
+    description: Branch the JSON data is written to. Must not be the default branch.
+    default: gh-workflow-stats-data
+  backfill-days:
+    description: On the first run, how many days of history to collect.
+    default: '90'
+  max-requests:
+    description: Approximate cap on API requests per run. The next run resumes.
+    default: '300'
+  recent-days:
+    description: The window, in days, for the headline numbers in summary.json.
+    default: '30'
+outputs:
+  runs-added:
+    description: Number of runs added or updated.
+  complete:
+    description: "'true' when the sync caught up; 'false' when it stopped early."
+  synced-through:
+    description: Data is complete for runs created before this time (ISO 8601).
+runs:
+  using: node24
+  main: packages/collector/dist/index.js

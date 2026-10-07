@@ -1,0 +1,19 @@
+{
+  "name": "@gh-workflow-stats/collector",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Action that collects workflow runs into the data branch",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "package": "esbuild src/index.ts --bundle --platform=node --target=node24 --format=esm --legal-comments=eof --outfile=dist/index.js --banner:js=\"import {createRequire as __cr} from 'node:module'; const require = __cr(import.meta.url);\""
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "dependencies": {
+    "@actions/core": "^3.0.1",
+    "@actions/github": "^9.1.1",
+    "@gh-workflow-stats/core": "0.1.0"
+  }
+}
