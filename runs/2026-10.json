@@ -65,6 +65,118 @@
      "completedAt": "2026-10-07T07:53:31Z"
     }
    ]
+  },
+  {
+   "id": 37592019953,
+   "attempt": 1,
+   "workflowId": 377189129,
+   "workflowName": "Dashboard",
+   "workflowPath": ".github/workflows/dashboard.yml",
+   "event": "workflow_dispatch",
+   "branch": "main",
+   "headSha": "227f941ca9242f129c2a1a8cf2b1c241a9a56047",
+   "conclusion": "success",
+   "createdAt": "2026-10-07T08:10:34Z",
+   "startedAt": "2026-10-07T08:10:34Z",
+   "updatedAt": "2026-10-07T08:11:24Z",
+   "jobs": [
+    {
+     "id": 112695537619,
+     "name": "Collect workflow runs",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T08:10:35Z",
+     "startedAt": "2026-10-07T08:10:38Z",
+     "completedAt": "2026-10-07T08:10:47Z"
+    },
+    {
+     "id": 112695611279,
+     "name": "Build site",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T08:10:47Z",
+     "startedAt": "2026-10-07T08:10:49Z",
+     "completedAt": "2026-10-07T08:11:08Z"
+    },
+    {
+     "id": 112695739450,
+     "name": "Deploy to GitHub Pages",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T08:11:08Z",
+     "startedAt": "2026-10-07T08:11:12Z",
+     "completedAt": "2026-10-07T08:11:23Z"
+    }
+   ]
+  },
+  {
+   "id": 37600077368,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "pull_request",
+   "branch": "readme-live-url",
+   "headSha": "df043753a562a0501eaae0a0181eda6e385af93d",
+   "conclusion": "success",
+   "createdAt": "2026-10-07T09:21:44Z",
+   "startedAt": "2026-10-07T09:21:44Z",
+   "updatedAt": "2026-10-07T09:22:31Z",
+   "jobs": [
+    {
+     "id": 112722018412,
+     "name": "scripts/ci.sh",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T09:21:45Z",
+     "startedAt": "2026-10-07T09:21:47Z",
+     "completedAt": "2026-10-07T09:22:30Z"
+    }
+   ]
+  },
+  {
+   "id": 37625347841,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "pull_request",
+   "branch": "readme-live-url",
+   "headSha": "df043753a562a0501eaae0a0181eda6e385af93d",
+   "conclusion": "cancelled",
+   "createdAt": "2026-10-07T13:01:55Z",
+   "startedAt": "2026-10-07T13:01:55Z",
+   "updatedAt": "2026-10-07T13:01:59Z",
+   "jobs": [
+    {
+     "id": 112805571793,
+     "name": "scripts/ci.sh",
+     "conclusion": "cancelled",
+     "createdAt": "2026-10-07T13:01:56Z",
+     "startedAt": "2026-10-07T13:01:56Z",
+     "completedAt": "2026-10-07T13:01:58Z"
+    }
+   ]
+  },
+  {
+   "id": 37625351032,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "pull_request",
+   "branch": "readme-live-url",
+   "headSha": "2514062b00b69a1ed929e14c69f3bd91741c0c4c",
+   "conclusion": "success",
+   "createdAt": "2026-10-07T13:01:57Z",
+   "startedAt": "2026-10-07T13:01:57Z",
+   "updatedAt": "2026-10-07T13:02:59Z",
+   "jobs": [
+    {
+     "id": 112805591924,
+     "name": "scripts/ci.sh",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T13:01:59Z",
+     "startedAt": "2026-10-07T13:02:01Z",
+     "completedAt": "2026-10-07T13:02:58Z"
+    }
+   ]
   }
  ]
 }

@@ -1,0 +1,1222 @@
+{
+ "schemaVersion": 1,
+ "month": "2026-10",
+ "tests": [
+  "unit::packages/collector/src/collect.test.ts::collect > creates the data branch with state and summary in an empty repository",
+  "unit::packages/collector/src/collect.test.ts::collect > writes runs into monthly shards and lists the months in the summary",
+  "unit::packages/collector/src/collect.test.ts::collect > merges into existing shards, replacing a re-run in place",
+  "unit::packages/collector/src/collect.test.ts::collect > does not commit when nothing new was collected",
+  "unit::packages/collector/src/collect.test.ts::collect > summarises each workflow over the recent days",
+  "unit::packages/collector/src/collect.test.ts::collect > records an incomplete sync as data complete only up to its cursor",
+  "unit::packages/collector/src/collect.test.ts::collect > refuses data written with another schema version",
+  "unit::packages/collector/src/collect.test.ts::collect > refuses an existing branch that it did not create",
+  "unit::packages/collector/src/collect.test.ts::collect > refuses a malformed data file",
+  "unit::packages/collector/src/collect.test.ts::collect: test reports > stores the report artifacts of each new run in a monthly test shard",
+  "unit::packages/collector/src/collect.test.ts::collect: test reports > lists suites with recent numbers in the summary",
+  "unit::packages/collector/src/collect.test.ts::collect: test reports > skips an expired artifact",
+  "unit::packages/collector/src/collect.test.ts::collect: test reports > skips a malformed report with a warning, and keeps the rest",
+  "unit::packages/collector/src/collect.test.ts::collect: test reports > skips a report whose suite does not match its artifact name",
+  "unit::packages/collector/src/collect.test.ts::collect: test reports > keeps runs whose reports it could not fetch, and fetches them next time",
+  "unit::packages/collector/src/config.test.ts::readConfig > reads every input",
+  "unit::packages/collector/src/config.test.ts::readConfig > refuses an empty token",
+  "unit::packages/collector/src/config.test.ts::readConfig > refuses an empty data-branch",
+  "unit::packages/collector/src/config.test.ts::readConfig > refuses an empty backfill-days",
+  "unit::packages/collector/src/config.test.ts::readConfig > refuses a number that is not a positive integer",
+  "unit::packages/collector/src/config.test.ts::readConfig > refuses to write to the default branch",
+  "unit::packages/collector/src/config.test.ts::readConfig > refuses a branch name with unexpected characters",
+  "unit::packages/collector/src/config.test.ts::readConfig > refuses a missing GITHUB_REPOSITORY",
+  "unit::packages/collector/src/octokit.test.ts::octokitRunsApi > lists one page of runs in a created range",
+  "unit::packages/collector/src/octokit.test.ts::octokitRunsApi > pages through every job of an attempt",
+  "unit::packages/collector/src/octokit.test.ts::octokitRunsApi > turns a 429 into a RateLimitError",
+  "unit::packages/collector/src/octokit.test.ts::octokitRunsApi > turns a 403 with no requests remaining into a RateLimitError",
+  "unit::packages/collector/src/octokit.test.ts::octokitRunsApi > names the missing permission on any other 403",
+  "unit::packages/collector/src/octokit.test.ts::octokitDataStore > reports a missing branch as no head",
+  "unit::packages/collector/src/octokit.test.ts::octokitDataStore > reads a file raw at a commit, and a missing one as null",
+  "unit::packages/collector/src/octokit.test.ts::octokitDataStore > creates the branch for a first commit",
+  "unit::packages/collector/src/octokit.test.ts::octokitDataStore > fast-forwards an existing branch and never forces",
+  "unit::packages/collector/src/octokit.test.ts::octokitDataStore > names the missing permission when a write is refused",
+  "unit::packages/collector/src/octokit.test.ts::octokitArtifactsApi > pages through a run’s artifacts",
+  "unit::packages/collector/src/octokit.test.ts::octokitArtifactsApi > reads the single file the download writes",
+  "unit::packages/collector/src/octokit.test.ts::octokitArtifactsApi > refuses a download that is not exactly one file",
+  "unit::packages/collector/src/octokit.test.ts::octokitArtifactsApi > names the missing permission when listing is refused",
+  "unit::packages/collector/src/sync.test.ts::sync > backfills from backfillDays ago when there is no cursor",
+  "unit::packages/collector/src/sync.test.ts::sync > starts from the cursor and stores runs with their jobs",
+  "unit::packages/collector/src/sync.test.ts::sync > moves the cursor to a day before now, to revisit re-runs",
+  "unit::packages/collector/src/sync.test.ts::sync > holds the cursor at the oldest run still in progress, and skips it",
+  "unit::packages/collector/src/sync.test.ts::sync > does not hold the cursor for a run stuck in progress for days",
+  "unit::packages/collector/src/sync.test.ts::sync > does not refetch jobs for a run it already stored unchanged",
+  "unit::packages/collector/src/sync.test.ts::sync > refetches a run that was re-run since it was stored",
+  "unit::packages/collector/src/sync.test.ts::sync > narrows the window when a range holds more than 1,000 runs",
+  "unit::packages/collector/src/sync.test.ts::sync > stops at the request budget and resumes from where it stopped",
+  "unit::packages/collector/src/sync.test.ts::sync > stops on a rate limit, keeping what it fetched",
+  "unit::packages/collector/src/sync.test.ts::sync > lets any other API error fail the sync",
+  "unit::packages/collector/src/sync.test.ts::sync > reports how many requests it used",
+  "unit::packages/collector/src/sync.test.ts::sync > handles an empty repository",
+  "unit::packages/core/src/stats.test.ts::percentile > returns null for no values",
+  "unit::packages/core/src/stats.test.ts::percentile > uses the nearest rank",
+  "unit::packages/core/src/stats.test.ts::runDurationMs > is the time from start to last update",
+  "unit::packages/core/src/stats.test.ts::runDurationMs > is null when the times are out of order",
+  "unit::packages/core/src/stats.test.ts::jobQueueMs > is the time from creation to start",
+  "unit::packages/core/src/stats.test.ts::jobQueueMs > is null for a job that never started",
+  "unit::packages/core/src/stats.test.ts::runStats > reports nulls for no runs",
+  "unit::packages/core/src/stats.test.ts::runStats > leaves cancelled and skipped runs out of the success rate",
+  "unit::packages/core/src/stats.test.ts::runStats > takes queue time from the jobs",
+  "unit::packages/core/src/stats.test.ts::monthOf > uses the UTC month",
+  "unit::packages/core/src/stats.test.ts::filterRuns > filters by workflow and branch",
+  "unit::packages/core/src/stats.test.ts::filterRuns > keeps runs created in [from, to)",
+  "unit::packages/core/src/stats.test.ts::dailySeries > groups by UTC day in date order, with empty days left out",
+  "unit::packages/core/src/stats.test.ts::slowestJobs > ranks job names by p95 duration, slowest first",
+  "unit::packages/core/src/stats.test.ts::slowestJobs > returns at most the limit",
+  "unit::packages/core/src/tests.test.ts::testKey > joins suite, classname and name",
+  "unit::packages/core/src/tests.test.ts::testKey > leaves out an empty classname",
+  "unit::packages/core/src/tests.test.ts::validateTestReport > accepts a well-formed report",
+  "unit::packages/core/src/tests.test.ts::validateTestReport > refuses a non-object",
+  "unit::packages/core/src/tests.test.ts::validateTestReport > refuses another schema version",
+  "unit::packages/core/src/tests.test.ts::validateTestReport > refuses a bad suite label",
+  "unit::packages/core/src/tests.test.ts::validateTestReport > refuses an unknown status",
+  "unit::packages/core/src/tests.test.ts::validateTestReport > refuses a negative duration",
+  "unit::packages/core/src/tests.test.ts::validateTestReport > refuses an over-long name",
+  "unit::packages/core/src/tests.test.ts::validateTestReport > refuses more tests than the limit",
+  "unit::packages/core/src/tests.test.ts::addReport > records failures and skips by key, and counts the rest",
+  "unit::packages/core/src/tests.test.ts::addReport > adds each test to its day: count, failures, total and max duration",
+  "unit::packages/core/src/tests.test.ts::addReport > leaves skipped tests out of the daily numbers",
+  "unit::packages/core/src/tests.test.ts::addReport > ignores a report it already has for the same run attempt and suite",
+  "unit::packages/core/src/tests.test.ts::addReport > keeps an earlier attempt when a re-run arrives",
+  "unit::packages/core/src/tests.test.ts::flakyTests > flags a test that failed and passed at the same commit",
+  "unit::packages/core/src/tests.test.ts::flakyTests > does not flag a test that failed at every run of a commit",
+  "unit::packages/core/src/tests.test.ts::flakyTests > does not count a run where the test was skipped as a pass",
+  "unit::packages/core/src/tests.test.ts::flakyTests > does not compare different commits or different suites",
+  "unit::packages/core/src/tests.test.ts::flakyTests > counts commits and keeps the runs that show it, most flaky first",
+  "unit::packages/core/src/tests.test.ts::failingTests > ranks tests by failures, with the latest failing run",
+  "unit::packages/core/src/tests.test.ts::testTimings > ranks tests by mean duration over the days in range",
+  "unit::packages/core/src/tests.test.ts::testTimings > leaves out days before the start",
+  "unit::packages/core/src/tests.test.ts::testHistory > gives one test per day across shards, oldest first",
+  "unit::packages/report/src/parse.test.ts::parseJunit > reads pytest output: failures, errors and skips",
+  "unit::packages/report/src/parse.test.ts::parseJunit > reads Vitest output, including an empty suite",
+  "unit::packages/report/src/parse.test.ts::parseJunit > reads gotestsum output, with subtests",
+  "unit::packages/report/src/parse.test.ts::parseJunit > converts seconds to milliseconds",
+  "unit::packages/report/src/parse.test.ts::parseJunit > reads a bare testsuite root, a decimal comma, and a missing classname",
+  "unit::packages/report/src/parse.test.ts::parseJunit > treats a missing or unreadable time as zero",
+  "unit::packages/report/src/parse.test.ts::parseJunit > refuses a document type declaration before parsing",
+  "unit::packages/report/src/parse.test.ts::parseJunit > refuses malformed XML",
+  "unit::packages/report/src/parse.test.ts::parseJunit > refuses XML that is not a JUnit report",
+  "unit::packages/report/src/parse.test.ts::parseGoTestJson > reads each test result in start order, subtests included",
+  "unit::packages/report/src/parse.test.ts::parseGoTestJson > records a package that failed with no failing test, so it is not lost",
+  "unit::packages/report/src/parse.test.ts::parseGoTestJson > counts a test that started but never finished as failed",
+  "unit::packages/report/src/parse.test.ts::parseGoTestJson > refuses a line that is not JSON",
+  "unit::packages/report/src/parse.test.ts::detectFormat > tells JUnit XML from go test JSON",
+  "unit::packages/report/src/parse.test.ts::detectFormat > refuses anything else",
+  "unit::packages/report/src/report.test.ts::buildReport > joins every file into one report for the suite",
+  "unit::packages/report/src/report.test.ts::buildReport > uses the format it is given",
+  "unit::packages/report/src/report.test.ts::buildReport > names the file that failed to parse",
+  "unit::packages/report/src/report.test.ts::buildReport > refuses no files",
+  "unit::packages/report/src/report.test.ts::readReportConfig > reads every input, one glob per line",
+  "unit::packages/report/src/report.test.ts::readReportConfig > refuses an empty path",
+  "unit::packages/report/src/report.test.ts::readReportConfig > refuses a suite label with spaces",
+  "unit::packages/report/src/report.test.ts::readReportConfig > refuses an unknown format",
+  "unit::packages/report/src/report.test.ts::readReportConfig > refuses a retention over 90 days",
+  "unit::packages/report/src/report.test.ts::summaryMarkdown > counts results and lists failed tests",
+  "unit::packages/report/src/report.test.ts::summaryMarkdown > caps the list of failures",
+  "unit::packages/report/src/report.test.ts::escapeMarkdown > neutralises HTML and Markdown in untrusted names",
+  "unit::packages/site/src/lib/charts.test.ts::durationChart > draws one series per outcome in its colour, in minutes",
+  "unit::packages/site/src/lib/charts.test.ts::durationChart > can be zoomed along time with the wheel and a slider",
+  "unit::packages/site/src/lib/charts.test.ts::durationChart > keeps the run id on each point for drill-down",
+  "unit::packages/site/src/lib/charts.test.ts::dailyChart > shows run count and success rate as a percentage",
+  "unit::packages/site/src/lib/charts.test.ts::dailyTooltipRows > labels the date, run count and success rate",
+  "unit::packages/site/src/lib/charts.test.ts::dailyTooltipRows > shows a dash for a day with no success rate",
+  "unit::packages/site/src/lib/charts.test.ts::dailyTooltipRows > returns nothing for data it does not recognise",
+  "unit::packages/site/src/lib/charts.test.ts::tooltipRows > passes branch names through as plain values for text rendering",
+  "unit::packages/site/src/lib/charts.test.ts::tooltipRows > formats the duration",
+  "unit::packages/site/src/lib/charts.test.ts::testsDailyChart > shows executions as bars and failures as a line",
+  "unit::packages/site/src/lib/charts.test.ts::testHistoryChart > shows mean and max duration in seconds, and failures",
+  "unit::packages/site/src/lib/charts.test.ts::seriesTooltipRows > labels each series value of an axis tooltip by its name",
+  "unit::packages/site/src/lib/data.test.ts::rangeFor > starts `days` before now",
+  "unit::packages/site/src/lib/data.test.ts::rangeFor > has no lower bound for all history",
+  "unit::packages/site/src/lib/data.test.ts::monthsToLoad > loads only the months the range touches",
+  "unit::packages/site/src/lib/data.test.ts::monthsToLoad > loads every month for all history",
+  "unit::packages/site/src/lib/data.test.ts::loadSummary > returns a summary it can read",
+  "unit::packages/site/src/lib/data.test.ts::loadSummary > explains a summary from another schema version",
+  "unit::packages/site/src/lib/data.test.ts::loadSummary > explains missing data",
+  "unit::packages/site/src/lib/data.test.ts::loadRuns > fetches each month and joins their runs in order",
+  "unit::packages/site/src/lib/data.test.ts::loadTestShards > fetches each month of test results",
+  "unit::packages/site/src/lib/data.test.ts::loadTestShards > explains a shard from another schema version",
+  "unit::packages/site/src/lib/format.test.ts::formatDuration > shows a dash for no value",
+  "unit::packages/site/src/lib/format.test.ts::formatDuration > shows milliseconds below a second, and tenths below ten seconds",
+  "unit::packages/site/src/lib/format.test.ts::formatDuration > picks units by size",
+  "unit::packages/site/src/lib/format.test.ts::formatPercent > rounds to a whole percent, or a dash",
+  "unit::packages/site/src/lib/format.test.ts::runUrl > builds a run link from the repository and id",
+  "unit::packages/site/src/lib/format.test.ts::runUrl > refuses a repository that is not owner/name",
+  "unit::packages/site/src/lib/freshness.test.ts::freshness > reports a caught-up collection as complete",
+  "unit::packages/site/src/lib/freshness.test.ts::freshness > warns when the collection stopped short and is still catching up",
+  "unit::packages/site/src/lib/freshness.test.ts::freshness > warns when nothing has been synced",
+  "unit::packages/site/src/lib/route.test.ts::parseRoute > reads the overview from an empty hash",
+  "unit::packages/site/src/lib/route.test.ts::parseRoute > reads a workflow with its filters",
+  "unit::packages/site/src/lib/route.test.ts::parseRoute > defaults to 30 days and all branches",
+  "unit::packages/site/src/lib/route.test.ts::parseRoute > accepts all history",
+  "unit::packages/site/src/lib/route.test.ts::parseRoute > falls back to 30 days for an unexpected value",
+  "unit::packages/site/src/lib/route.test.ts::parseRoute > treats an unknown path as not found",
+  "unit::packages/site/src/lib/route.test.ts::test routes > reads the tests view with its filters",
+  "unit::packages/site/src/lib/route.test.ts::test routes > reads one test by its key",
+  "unit::packages/site/src/lib/route.test.ts::test routes > treats a test view without a key as not found",
+  "unit::packages/site/src/lib/route.test.ts::test routes > round-trips test routes",
+  "unit::packages/site/src/lib/route.test.ts::formatRoute > round-trips a workflow route",
+  "unit::packages/site/src/lib/route.test.ts::formatRoute > leaves default filters out of the URL",
+  "unit::packages/site/src/lib/tests.test.ts::testsView > keeps runs in range and in the suite",
+  "unit::packages/site/src/lib/tests.test.ts::testsView > lists every suite in range for the filter, sorted",
+  "unit::packages/site/src/lib/tests.test.ts::testsView > finds flaky and failing tests in range",
+  "unit::packages/site/src/lib/tests.test.ts::testsView > ranks the slowest tests in the suite",
+  "unit::packages/site/src/lib/tests.test.ts::testsView > totals executions and failures per day in the suite",
+  "unit::packages/site/src/lib/tests.test.ts::testDetail > gives the daily history and the failing runs, newest first",
+  "unit::packages/site/src/lib/tests.test.ts::testDetail > leaves out days and failures before the start",
+  "unit::packages/site/src/lib/tests.test.ts::displayName > splits the suite from the rest of the key",
+  "unit::packages/site/src/lib/workflow.test.ts::workflowView > keeps only the workflow and range, then the branch",
+  "unit::packages/site/src/lib/workflow.test.ts::workflowView > offers every branch of the workflow in range, sorted",
+  "unit::packages/site/src/lib/workflow.test.ts::workflowView > offers the selected branch even when it has no runs in range",
+  "unit::packages/site/src/lib/workflow.test.ts::durationPoints > groups runs by outcome, leaving out runs with no duration"
+ ],
+ "runs": [
+  {
+   "runId": 37625351032,
+   "attempt": 1,
+   "suite": "unit",
+   "headSha": "2514062b00b69a1ed929e14c69f3bd91741c0c4c",
+   "branch": "readme-live-url",
+   "workflowId": 377189126,
+   "createdAt": "2026-10-07T13:01:57Z",
+   "total": 171,
+   "passed": 171,
+   "failed": [],
+   "skipped": []
+  }
+ ],
+ "daily": {
+  "2026-10-07": {
+   "0": [
+    1,
+    0,
+    6,
+    6
+   ],
+   "1": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "2": [
+    1,
+    0,
+    16,
+    16
+   ],
+   "3": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "4": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "5": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "6": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "7": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "8": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "9": [
+    1,
+    0,
+    3,
+    3
+   ],
+   "10": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "11": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "12": [
+    1,
+    0,
+    3,
+    3
+   ],
+   "13": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "14": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "15": [
+    1,
+    0,
+    4,
+    4
+   ],
+   "16": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "17": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "18": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "19": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "20": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "21": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "22": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "23": [
+    1,
+    0,
+    5,
+    5
+   ],
+   "24": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "25": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "26": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "27": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "28": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "29": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "30": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "31": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "32": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "33": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "34": [
+    1,
+    0,
+    6,
+    6
+   ],
+   "35": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "36": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "37": [
+    1,
+    0,
+    4,
+    4
+   ],
+   "38": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "39": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "40": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "41": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "42": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "43": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "44": [
+    1,
+    0,
+    38,
+    38
+   ],
+   "45": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "46": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "47": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "48": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "49": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "50": [
+    1,
+    0,
+    3,
+    3
+   ],
+   "51": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "52": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "53": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "54": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "55": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "56": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "57": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "58": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "59": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "60": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "61": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "62": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "63": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "64": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "65": [
+    1,
+    0,
+    3,
+    3
+   ],
+   "66": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "67": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "68": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "69": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "70": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "71": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "72": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "73": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "74": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "75": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "76": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "77": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "78": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "79": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "80": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "81": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "82": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "83": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "84": [
+    1,
+    0,
+    14,
+    14
+   ],
+   "85": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "86": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "87": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "88": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "89": [
+    1,
+    0,
+    11,
+    11
+   ],
+   "90": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "91": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "92": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "93": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "94": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "95": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "96": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "97": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "98": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "99": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "100": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "101": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "102": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "103": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "104": [
+    1,
+    0,
+    13,
+    13
+   ],
+   "105": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "106": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "107": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "108": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "109": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "110": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "111": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "112": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "113": [
+    1,
+    0,
+    3,
+    3
+   ],
+   "114": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "115": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "116": [
+    1,
+    0,
+    4,
+    4
+   ],
+   "117": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "118": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "119": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "120": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "121": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "122": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "123": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "124": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "125": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "126": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "127": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "128": [
+    1,
+    0,
+    5,
+    5
+   ],
+   "129": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "130": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "131": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "132": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "133": [
+    1,
+    0,
+    2,
+    2
+   ],
+   "134": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "135": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "136": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "137": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "138": [
+    1,
+    0,
+    3,
+    3
+   ],
+   "139": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "140": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "141": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "142": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "143": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "144": [
+    1,
+    0,
+    4,
+    4
+   ],
+   "145": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "146": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "147": [
+    1,
+    0,
+    3,
+    3
+   ],
+   "148": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "149": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "150": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "151": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "152": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "153": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "154": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "155": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "156": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "157": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "158": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "159": [
+    1,
+    0,
+    4,
+    4
+   ],
+   "160": [
+    1,
+    0,
+    14,
+    14
+   ],
+   "161": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "162": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "163": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "164": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "165": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "166": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "167": [
+    1,
+    0,
+    3,
+    3
+   ],
+   "168": [
+    1,
+    0,
+    0,
+    0
+   ],
+   "169": [
+    1,
+    0,
+    1,
+    1
+   ],
+   "170": [
+    1,
+    0,
+    1,
+    1
+   ]
+  }
+ }
+}
