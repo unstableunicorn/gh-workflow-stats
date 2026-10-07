@@ -1,0 +1,70 @@
+{
+ "schemaVersion": 1,
+ "month": "2026-10",
+ "runs": [
+  {
+   "id": 37590090947,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "push",
+   "branch": "main",
+   "headSha": "227f941ca9242f129c2a1a8cf2b1c241a9a56047",
+   "conclusion": "success",
+   "createdAt": "2026-10-07T07:52:50Z",
+   "startedAt": "2026-10-07T07:52:50Z",
+   "updatedAt": "2026-10-07T07:53:48Z",
+   "jobs": [
+    {
+     "id": 112689231664,
+     "name": "scripts/ci.sh",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T07:52:51Z",
+     "startedAt": "2026-10-07T07:52:53Z",
+     "completedAt": "2026-10-07T07:53:47Z"
+    }
+   ]
+  },
+  {
+   "id": 37590090973,
+   "attempt": 1,
+   "workflowId": 377189129,
+   "workflowName": "Dashboard",
+   "workflowPath": ".github/workflows/dashboard.yml",
+   "event": "push",
+   "branch": "main",
+   "headSha": "227f941ca9242f129c2a1a8cf2b1c241a9a56047",
+   "conclusion": "success",
+   "createdAt": "2026-10-07T07:52:50Z",
+   "startedAt": "2026-10-07T07:52:50Z",
+   "updatedAt": "2026-10-07T07:53:32Z",
+   "jobs": [
+    {
+     "id": 112689231981,
+     "name": "Collect workflow runs",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T07:52:51Z",
+     "startedAt": "2026-10-07T07:52:53Z",
+     "completedAt": "2026-10-07T07:53:01Z"
+    },
+    {
+     "id": 112689291987,
+     "name": "Build site",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T07:53:02Z",
+     "startedAt": "2026-10-07T07:53:04Z",
+     "completedAt": "2026-10-07T07:53:19Z"
+    },
+    {
+     "id": 112689395421,
+     "name": "Deploy to GitHub Pages",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T07:53:20Z",
+     "startedAt": "2026-10-07T07:53:23Z",
+     "completedAt": "2026-10-07T07:53:31Z"
+    }
+   ]
+  }
+ ]
+}
