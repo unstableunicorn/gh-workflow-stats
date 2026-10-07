@@ -42,6 +42,20 @@ export interface SyncState {
   schemaVersion: typeof SCHEMA_VERSION
   /** Runs created at or after this time may still be missing or incomplete. */
   cursor: string | null
+  /** Stored runs whose test reports are still to be fetched. */
+  pendingTests?: PendingTests[]
+}
+
+export interface PendingTests {
+  runId: number
+  attempt: number
+  month: string
+}
+
+/** Headline test numbers for one suite over the recent days. */
+export interface SuiteSummary {
+  suite: string
+  recent: {reports: number; tests: number; failures: number; flaky: number}
 }
 
 /** Headline numbers over a set of runs. Durations are milliseconds. */
@@ -72,6 +86,8 @@ export interface Summary {
   recentDays: number
   months: string[]
   workflows: WorkflowSummary[]
+  /** Present once any test report has been collected. */
+  tests?: {months: string[]; suites: SuiteSummary[]}
 }
 
 export const paths = {

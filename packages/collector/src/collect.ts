@@ -3,18 +3,25 @@
 
 import {
   SCHEMA_VERSION,
+  emptyTestShard,
   filterRuns,
+  flakyTests,
   monthOf,
   paths,
   runStats,
+  testPaths,
+  type PendingTests,
   type RunRecord,
   type RunShard,
+  type SuiteSummary,
   type Summary,
   type SyncState,
+  type TestShard,
   type WorkflowSummary
 } from '@gh-workflow-stats/core'
-import type {DataStore, FileWrite, RunsApi} from './github'
+import type {ArtifactsApi, DataStore, FileWrite, RunsApi} from './github'
 import {sync} from './sync'
+import {collectTests} from './tests'
 
 const DAY = 86_400_000
 
@@ -31,12 +38,14 @@ export interface CollectResult {
   complete: boolean
   stoppedBy?: string
   syncedThrough: string
+  /** Reports that were skipped, and why. */
+  warnings: string[]
   commit: string | null
 }
 
 /** Syncs new runs into the data branch; commits only when something changed. */
 export async function collect(
-  api: RunsApi,
+  api: RunsApi & ArtifactsApi,
   store: DataStore,
   now: Date,
   config: CollectConfig
@@ -64,8 +73,8 @@ export async function collect(
     Date.parse(syncFrom) < Date.parse(recentFrom) ? syncFrom : recentFrom
   )
   const shards = new Map<string, RunShard>()
-  for (const month of previous?.months ?? []) {
-    if (month < firstMonth) continue
+  const loadRunShard = async (month: string): Promise<void> => {
+    if (shards.has(month) || !(previous?.months ?? []).includes(month)) return
     const shard = await readJson<RunShard>(paths.shard(month))
     if (shard === null)
       throw new Error(
@@ -73,6 +82,9 @@ export async function collect(
       )
     shards.set(month, shard)
   }
+  for (const month of previous?.months ?? [])
+    if (month >= firstMonth) await loadRunShard(month)
+  for (const p of state?.pendingTests ?? []) await loadRunShard(p.month)
 
   const stored = [...shards.values()].flatMap(s => s.runs)
   const result = await sync({
@@ -86,16 +98,51 @@ export async function collect(
     maxRequests: config.maxRequests
   })
 
+  const touched = mergeRuns(shards, result.runs)
+
+  const testShards = new Map<string, TestShard>()
+  const loadTestShard = async (month: string): Promise<TestShard> =>
+    testShards.get(month) ??
+    (await readJson<TestShard>(testPaths.shard(month))) ??
+    emptyTestShard(month)
+  const previousPending = state?.pendingTests ?? []
+  const queue = dedupe([
+    ...previousPending,
+    ...result.runs.map(r => ({
+      runId: r.id,
+      attempt: r.attempt,
+      month: monthOf(r.createdAt)
+    }))
+  ])
+  const tests = await collectTests({
+    api,
+    queue,
+    findRun: p =>
+      shards
+        .get(p.month)
+        ?.runs.find(r => r.id === p.runId && r.attempt === p.attempt),
+    loadShard: loadTestShard,
+    budget: config.maxRequests - result.requests
+  })
+  for (const [month, shard] of tests.shards) testShards.set(month, shard)
+
+  const stoppedBy = result.stoppedBy ?? tests.stoppedBy
   const outcome = {
     runsAdded: result.runs.length,
-    complete: result.complete,
-    ...(result.stoppedBy === undefined ? {} : {stoppedBy: result.stoppedBy}),
-    syncedThrough: result.cursor
+    complete: result.complete && tests.pending.length === 0,
+    ...(stoppedBy === undefined ? {} : {stoppedBy}),
+    syncedThrough: result.cursor,
+    warnings: tests.warnings
   }
-  if (result.runs.length === 0 && head !== null)
+  const pendingChanged =
+    JSON.stringify(tests.pending) !== JSON.stringify(previousPending)
+  if (
+    result.runs.length === 0 &&
+    tests.shards.size === 0 &&
+    !pendingChanged &&
+    head !== null
+  )
     return {...outcome, commit: null}
-
-  const touched = mergeRuns(shards, result.runs)
   const months = [
     ...new Set([...(previous?.months ?? []), ...shards.keys()])
   ].sort()
@@ -112,15 +159,36 @@ export async function collect(
     months,
     workflows: summariseWorkflows(previous?.workflows ?? [], recent)
   }
+  const testMonths = [
+    ...new Set([...(previous?.tests?.months ?? []), ...testShards.keys()])
+  ].sort()
+  if (testMonths.length > 0) {
+    for (const month of testMonths)
+      if (month >= monthOf(recentFrom))
+        testShards.set(month, await loadTestShard(month))
+    summary.tests = {
+      months: testMonths,
+      suites: summariseSuites(
+        previous?.tests?.suites ?? [],
+        [...testShards.values()],
+        recentFrom
+      )
+    }
+  }
   const newState: SyncState = {
     schemaVersion: SCHEMA_VERSION,
-    cursor: result.cursor
+    cursor: result.cursor,
+    pendingTests: tests.pending
   }
 
   const files: FileWrite[] = [
     ...touched.map(m => ({
       path: paths.shard(m),
       content: toJson(shards.get(m))
+    })),
+    ...[...tests.shards.keys()].sort().map(m => ({
+      path: testPaths.shard(m),
+      content: toJson(testShards.get(m))
     })),
     {path: paths.state, content: toJson(newState)},
     {path: paths.summary, content: toJson(summary)}
@@ -150,6 +218,52 @@ function mergeRuns(shards: Map<string, RunShard>, runs: RunRecord[]): string[] {
     touched.add(month)
   }
   return [...touched].sort()
+}
+
+function dedupe(items: PendingTests[]): PendingTests[] {
+  const seen = new Set<string>()
+  return items.filter(p => {
+    const id = `${p.runId}:${p.attempt}`
+    if (seen.has(id)) return false
+    seen.add(id)
+    return true
+  })
+}
+
+/** Every suite seen before or recently, with numbers over the recent runs. */
+function summariseSuites(
+  previous: SuiteSummary[],
+  shards: TestShard[],
+  recentFrom: string
+): SuiteSummary[] {
+  const runs = shards
+    .flatMap(s => s.runs)
+    .filter(r => Date.parse(r.createdAt) >= Date.parse(recentFrom))
+  const fromDate = recentFrom.slice(0, 10)
+  const suites = new Set([
+    ...previous.map(s => s.suite),
+    ...runs.map(r => r.suite)
+  ])
+  return [...suites].sort().map(suite => {
+    const own = runs.filter(r => r.suite === suite)
+    const keys = new Set<string>()
+    for (const shard of shards)
+      for (const [date, day] of Object.entries(shard.daily))
+        if (date >= fromDate)
+          for (const index of Object.keys(day)) {
+            const key = shard.tests[Number(index)]
+            if (key?.startsWith(`${suite}::`)) keys.add(key)
+          }
+    return {
+      suite,
+      recent: {
+        reports: own.length,
+        tests: keys.size,
+        failures: own.reduce((n, r) => n + r.failed.length, 0),
+        flaky: flakyTests(own).length
+      }
+    }
+  })
 }
 
 /** Every workflow seen before or recently, with stats over the recent runs. */

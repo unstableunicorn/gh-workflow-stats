@@ -37,6 +37,8 @@ export interface SyncResult {
   /** False when the budget or a rate limit stopped the sync early. */
   complete: boolean
   stoppedBy?: string
+  /** API requests this sync made. */
+  requests: number
 }
 
 class Stop extends Error {}
@@ -101,6 +103,7 @@ export async function sync(opts: SyncOptions): Promise<SyncResult> {
       runs: [...collected.values()],
       cursor: earliest(hold, new Date(from).toISOString()),
       complete: false,
+      requests,
       stoppedBy
     }
   }
@@ -108,7 +111,8 @@ export async function sync(opts: SyncOptions): Promise<SyncResult> {
   return {
     runs: [...collected.values()],
     cursor: earliest(hold, new Date(now - REVISIT).toISOString()),
-    complete: true
+    complete: true,
+    requests
   }
 }
 
