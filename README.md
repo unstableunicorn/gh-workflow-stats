@@ -14,6 +14,9 @@ It shows, per workflow:
 
 Test history and DORA metrics are planned.
 
+**See it running:** this repository's own dashboard is at
+<https://gh-workflow-stats.unstableunicorn.dev/>.
+
 > **Status: early.** There is no release yet. Pin the Action to a commit SHA.
 
 ## How it works
