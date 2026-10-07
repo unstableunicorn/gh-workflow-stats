@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="3" failures="1" errors="0" time="0.5">
+    <testsuite name="src/lib/route.test.ts" timestamp="2026-10-05T10:00:00.000Z" hostname="octo-runner" tests="2" failures="1" errors="0" skipped="0" time="0.01">
+        <testcase classname="src/lib/route.test.ts" name="parseRoute &gt; reads the overview" time="0.002">
+        </testcase>
+        <testcase classname="src/lib/route.test.ts" name="parseRoute &gt; reads a workflow" time="0.004">
+            <failure message="expected 1 to be 2" type="AssertionError">
+AssertionError: expected 1 to be 2
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/empty.test.ts" tests="0" failures="0" errors="0" skipped="0" time="0">
+    </testsuite>
+    <testsuite name="src/lib/format.test.ts" tests="1" failures="0" errors="0" skipped="0" time="0.003">
+        <testcase classname="src/lib/format.test.ts" name="formatDuration &gt; shows a dash" time="0.001">
+        </testcase>
+    </testsuite>
+</testsuites>

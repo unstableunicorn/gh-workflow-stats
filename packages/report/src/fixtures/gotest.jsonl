@@ -1,0 +1,16 @@
+{"Time":"2026-10-05T10:00:00Z","Action":"start","Package":"example.com/octo/api"}
+{"Time":"2026-10-05T10:00:00Z","Action":"run","Package":"example.com/octo/api","Test":"TestHealth"}
+{"Time":"2026-10-05T10:00:00Z","Action":"output","Package":"example.com/octo/api","Test":"TestHealth","Output":"=== RUN   TestHealth\n"}
+{"Time":"2026-10-05T10:00:00Z","Action":"pass","Package":"example.com/octo/api","Test":"TestHealth","Elapsed":0.01}
+{"Time":"2026-10-05T10:00:00Z","Action":"run","Package":"example.com/octo/api","Test":"TestLogin"}
+{"Time":"2026-10-05T10:00:00Z","Action":"run","Package":"example.com/octo/api","Test":"TestLogin/bad_password"}
+{"Time":"2026-10-05T10:00:00Z","Action":"fail","Package":"example.com/octo/api","Test":"TestLogin/bad_password","Elapsed":0.1}
+{"Time":"2026-10-05T10:00:00Z","Action":"fail","Package":"example.com/octo/api","Test":"TestLogin","Elapsed":0.11}
+{"Time":"2026-10-05T10:00:00Z","Action":"run","Package":"example.com/octo/api","Test":"TestLater"}
+{"Time":"2026-10-05T10:00:00Z","Action":"skip","Package":"example.com/octo/api","Test":"TestLater","Elapsed":0}
+{"Time":"2026-10-05T10:00:00Z","Action":"fail","Package":"example.com/octo/api","Elapsed":0.2}
+{"Time":"2026-10-05T10:00:00Z","Action":"start","Package":"example.com/octo/broken"}
+{"Time":"2026-10-05T10:00:00Z","Action":"output","Package":"example.com/octo/broken","Output":"# example.com/octo/broken\n"}
+{"Time":"2026-10-05T10:00:00Z","Action":"fail","Package":"example.com/octo/broken","Elapsed":0}
+{"Time":"2026-10-05T10:00:00Z","Action":"start","Package":"example.com/octo/notests"}
+{"Time":"2026-10-05T10:00:00Z","Action":"skip","Package":"example.com/octo/notests","Elapsed":0}

@@ -1,0 +1,31 @@
+name: GitHub workflow stats - test report
+description: Turn JUnit XML or go test -json output into a test report for the workflow stats dashboard
+author: unstableunicorn
+branding:
+  icon: check-square
+  color: blue
+inputs:
+  path:
+    description: >-
+      Report files to read, one glob per line. JUnit XML (pytest, Vitest,
+      Jest, Playwright, gotestsum and most others) or `go test -json` output.
+    required: true
+  suite:
+    description: >-
+      A label for these results, unique within the workflow run, for example
+      `backend` or `web`. Letters, digits, `.`, `_` and `-`.
+    required: true
+  format:
+    description: '`auto` (by the first character), `junit` or `go-json`.'
+    default: auto
+  retention-days:
+    description: Days to keep the report artifact. The collector needs it until its next run.
+    default: '14'
+outputs:
+  tests:
+    description: Number of tests in the report.
+  failed:
+    description: Number of failed tests.
+runs:
+  using: node24
+  main: dist/index.js
