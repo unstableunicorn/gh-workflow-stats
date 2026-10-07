@@ -177,6 +177,94 @@
      "completedAt": "2026-10-07T13:02:58Z"
     }
    ]
+  },
+  {
+   "id": 37640791505,
+   "attempt": 1,
+   "workflowId": 377189129,
+   "workflowName": "Dashboard",
+   "workflowPath": ".github/workflows/dashboard.yml",
+   "event": "push",
+   "branch": "main",
+   "headSha": "38063b8898471646c66f04445da07047e735e6ca",
+   "conclusion": "success",
+   "createdAt": "2026-10-07T14:55:36Z",
+   "startedAt": "2026-10-07T14:55:36Z",
+   "updatedAt": "2026-10-07T14:57:23Z",
+   "jobs": [
+    {
+     "id": 112858894869,
+     "name": "Collect workflow runs",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T14:55:37Z",
+     "startedAt": "2026-10-07T14:56:14Z",
+     "completedAt": "2026-10-07T14:56:24Z"
+    },
+    {
+     "id": 112859248929,
+     "name": "Build site",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T14:56:24Z",
+     "startedAt": "2026-10-07T14:56:26Z",
+     "completedAt": "2026-10-07T14:56:46Z"
+    },
+    {
+     "id": 112859419932,
+     "name": "Deploy to GitHub Pages",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T14:56:47Z",
+     "startedAt": "2026-10-07T14:56:52Z",
+     "completedAt": "2026-10-07T14:57:22Z"
+    }
+   ]
+  },
+  {
+   "id": 37640791417,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "push",
+   "branch": "main",
+   "headSha": "38063b8898471646c66f04445da07047e735e6ca",
+   "conclusion": "success",
+   "createdAt": "2026-10-07T14:55:36Z",
+   "startedAt": "2026-10-07T14:55:36Z",
+   "updatedAt": "2026-10-07T14:56:36Z",
+   "jobs": [
+    {
+     "id": 112858894415,
+     "name": "scripts/ci.sh",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T14:55:37Z",
+     "startedAt": "2026-10-07T14:55:40Z",
+     "completedAt": "2026-10-07T14:56:35Z"
+    }
+   ]
+  },
+  {
+   "id": 37641564914,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "pull_request",
+   "branch": "copy-test-data",
+   "headSha": "25c4e20fc825df00125b01dd6578c543ba3810fb",
+   "conclusion": "success",
+   "createdAt": "2026-10-07T15:01:18Z",
+   "startedAt": "2026-10-07T15:01:18Z",
+   "updatedAt": "2026-10-07T15:02:17Z",
+   "jobs": [
+    {
+     "id": 112861574125,
+     "name": "scripts/ci.sh",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T15:01:18Z",
+     "startedAt": "2026-10-07T15:01:21Z",
+     "completedAt": "2026-10-07T15:02:17Z"
+    }
+   ]
   }
  ]
 }
