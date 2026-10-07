@@ -1,0 +1,11 @@
+{
+  "name": "@gh-workflow-stats/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The data contract and statistics shared by the collector and the site",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

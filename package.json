@@ -1,0 +1,34 @@
+{
+  "name": "gh-workflow-stats",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CI, test and DORA dashboards for GitHub repositories, with no server",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/core",
+    "packages/collector",
+    "packages/site"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc -p packages/core && tsc -p packages/collector && tsc -p packages/site",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format-check": "prettier --check .",
+    "test": "vitest run",
+    "package": "npm run package -w packages/collector",
+    "build:site": "npm run build -w packages/site"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.19.1",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^5.0.3"
+  }
+}
