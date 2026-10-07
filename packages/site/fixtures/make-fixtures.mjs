@@ -102,6 +102,56 @@ const stats = wfRuns => {
     queueP50Ms: 15_000
   }
 }
+// Test results for CI runs: suite "unit"; one flaky test, one with an HTML name.
+const testKeys = [
+  'unit::pkg::adds',
+  'unit::pkg::sometimes fails',
+  'unit::pkg::<img src=x onerror=alert(1)>'
+]
+const testMonths = new Map()
+for (const r of runs.filter(r => r.workflowId === 1001)) {
+  const month = r.createdAt.slice(0, 7)
+  const shard = testMonths.get(month) ?? {
+    schemaVersion: 1,
+    month,
+    tests: testKeys,
+    runs: [],
+    daily: {}
+  }
+  const flakyFailed = random() < 0.15
+  const failed = flakyFailed ? [testKeys[1]] : []
+  shard.runs.push({
+    runId: r.id,
+    attempt: 1,
+    suite: 'unit',
+    headSha: r.headSha,
+    branch: r.branch,
+    workflowId: r.workflowId,
+    createdAt: r.createdAt,
+    total: 3,
+    passed: 3 - failed.length,
+    failed,
+    skipped: []
+  })
+  if (flakyFailed)
+    shard.runs.push({...shard.runs.at(-1), attempt: 2, failed: [], passed: 3})
+  const day = (shard.daily[r.createdAt.slice(0, 10)] ??= {})
+  testKeys.forEach((_, i) => {
+    const ms = Math.round(50 + random() * 400 * (i + 1))
+    const [c, f, t, m] = day[i] ?? [0, 0, 0, 0]
+    day[i] = [
+      c + 1,
+      f + (i === 1 && flakyFailed ? 1 : 0),
+      t + ms,
+      Math.max(m, ms)
+    ]
+  })
+  testMonths.set(month, shard)
+}
+mkdirSync(join(out, 'tests'), {recursive: true})
+for (const [month, shard] of testMonths)
+  writeFileSync(join(out, 'tests', `${month}.json`), JSON.stringify(shard))
+
 writeFileSync(
   join(out, 'summary.json'),
   JSON.stringify({
@@ -116,7 +166,16 @@ writeFileSync(
       name: w.name,
       path: w.path,
       recent: stats(recent.filter(r => r.workflowId === w.id))
-    }))
+    })),
+    tests: {
+      months: [...testMonths.keys()].sort(),
+      suites: [
+        {
+          suite: 'unit',
+          recent: {reports: 100, tests: 3, failures: 15, flaky: 1}
+        }
+      ]
+    }
   })
 )
 writeFileSync(

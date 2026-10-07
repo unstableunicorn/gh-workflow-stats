@@ -1,7 +1,18 @@
 // RunsApi and DataStore over Octokit's request function. Writes use the Git
 // Data API, so the collector never checks out or pushes with git.
 
-import type {ApiJob, ApiRun, DataStore, FileWrite, RunsApi} from './github'
+import {mkdtemp, readFile, readdir, rm} from 'node:fs/promises'
+import {tmpdir} from 'node:os'
+import {join} from 'node:path'
+import type {
+  ApiArtifact,
+  ApiJob,
+  ApiRun,
+  ArtifactsApi,
+  DataStore,
+  FileWrite,
+  RunsApi
+} from './github'
 import {RateLimitError} from './sync'
 
 /** Octokit's `request`, narrowed to what the adapters use. */
@@ -165,6 +176,56 @@ export function octokitDataStore(
           force: false
         })
       return commit.sha
+    }
+  }
+}
+
+/** Downloads artifact `id` of run `runId` into `dir`. */
+export type Download = (id: number, runId: number, dir: string) => Promise<void>
+
+/** Lists artifacts with `request` and fetches them with `download`; needs `actions: read`. */
+export function octokitArtifactsApi(
+  request: Request,
+  repo: Repo,
+  download: Download
+): ArtifactsApi {
+  return {
+    async listArtifacts(runId) {
+      const artifacts: ApiArtifact[] = []
+      for (let page = 1; ; page++) {
+        let data: {artifacts: ApiArtifact[]}
+        try {
+          data = (
+            await request(
+              'GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts',
+              {
+                ...repo,
+                run_id: runId,
+                page,
+                per_page: 100
+              }
+            )
+          ).data as {artifacts: ApiArtifact[]}
+        } catch (error) {
+          return explain(error, 'actions: read')
+        }
+        artifacts.push(...data.artifacts)
+        if (data.artifacts.length < 100) return artifacts
+      }
+    },
+    async downloadText(artifactId, runId) {
+      const dir = await mkdtemp(join(tmpdir(), 'gws-artifact-'))
+      try {
+        await download(artifactId, runId, dir)
+        const files = await readdir(dir)
+        if (files.length !== 1 || files[0] === undefined)
+          throw new Error(
+            `Artifact ${artifactId} held ${files.length} files; expected one report`
+          )
+        return await readFile(join(dir, files[0]), 'utf8')
+      } finally {
+        await rm(dir, {recursive: true, force: true})
+      }
     }
   }
 }

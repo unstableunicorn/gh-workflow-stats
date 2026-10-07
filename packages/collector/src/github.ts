@@ -41,6 +41,21 @@ export interface RunsApi {
   listJobs(runId: number, attempt: number): Promise<ApiJob[]>
 }
 
+/** The fields of a workflow run artifact the collector reads. */
+export interface ApiArtifact {
+  id: number
+  name: string
+  expired: boolean
+  size_in_bytes: number
+}
+
+/** Lists a run's artifacts and downloads one as text. */
+export interface ArtifactsApi {
+  listArtifacts(runId: number): Promise<ApiArtifact[]>
+  /** The artifact's single file, as text. */
+  downloadText(artifactId: number, runId: number): Promise<string>
+}
+
 export interface FileWrite {
   path: string
   content: string

@@ -8,18 +8,19 @@
   "workspaces": [
     "packages/core",
     "packages/collector",
+    "packages/report",
     "packages/site"
   ],
   "engines": {
     "node": ">=24"
   },
   "scripts": {
-    "typecheck": "tsc -p packages/core && tsc -p packages/collector && tsc -p packages/site",
+    "typecheck": "tsc -p packages/core && tsc -p packages/collector && tsc -p packages/report && tsc -p packages/site",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format-check": "prettier --check .",
     "test": "vitest run",
-    "package": "npm run package -w packages/collector",
+    "package": "npm run package -w packages/collector && npm run package -w packages/report",
     "build:site": "npm run build -w packages/site"
   },
   "devDependencies": {

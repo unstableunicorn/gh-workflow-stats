@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="2" failures="1" errors="0" time="0.120000">
+	<testsuite tests="2" failures="1" time="0.110000" name="example.com/octo/api" timestamp="2026-10-05T10:00:00Z">
+		<properties>
+			<property name="go.version" value="go1.25.0 linux/amd64"></property>
+		</properties>
+		<testcase classname="example.com/octo/api" name="TestHealth" time="0.010000"></testcase>
+		<testcase classname="example.com/octo/api" name="TestLogin/bad_password" time="0.100000">
+			<failure message="Failed" type="">=== RUN   TestLogin/bad_password&#xA;    login_test.go:12: got 200&#xA;</failure>
+		</testcase>
+	</testsuite>
+</testsuites>

@@ -1,0 +1,21 @@
+{
+  "name": "@gh-workflow-stats/report",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Action that turns test reports into a normalized artifact",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "package": "esbuild src/index.ts --bundle --platform=node --target=node24 --format=esm --legal-comments=eof --outfile=../../report/dist/index.js --banner:js=\"import {createRequire as __cr} from 'node:module'; const require = __cr(import.meta.url);\""
+  },
+  "dependencies": {
+    "@actions/artifact": "^6.3.1",
+    "@actions/core": "^3.0.1",
+    "@actions/glob": "^0.7.0",
+    "@gh-workflow-stats/core": "0.1.0",
+    "fast-xml-parser": "^5.11.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}

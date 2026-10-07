@@ -214,6 +214,15 @@ describe('sync', () => {
     ).rejects.toThrow(/not accessible/)
   })
 
+  it('reports how many requests it used', async () => {
+    const {api} = fakeApi([
+      apiRun(1, '2026-10-05T00:00:00Z'),
+      apiRun(2, '2026-10-05T01:00:00Z')
+    ])
+    const result = await sync(options(api, {cursor: '2026-10-04T00:00:00Z'}))
+    expect(result.requests).toBe(3)
+  })
+
   it('handles an empty repository', async () => {
     const result = await sync(options(fakeApi([]).api))
     expect(result.runs).toEqual([])

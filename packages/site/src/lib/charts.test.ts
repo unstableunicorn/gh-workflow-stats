@@ -4,6 +4,9 @@ import {
   dailyChart,
   dailyTooltipRows,
   durationChart,
+  seriesTooltipRows,
+  testHistoryChart,
+  testsDailyChart,
   tooltipRows,
   type Theme
 } from './charts'
@@ -118,5 +121,47 @@ describe('tooltipRows', () => {
       label: 'Duration',
       value: '2m 05s'
     })
+  })
+})
+
+describe('testsDailyChart', () => {
+  it('shows executions as bars and failures as a line', () => {
+    const option = testsDailyChart(
+      [{date: '2026-10-05', executions: 40, failures: 2}],
+      theme
+    )
+    expect(option.series.map(s => [s.name, s.type, s.data[0]])).toEqual([
+      ['Test executions', 'bar', ['2026-10-05', 40]],
+      ['Failures', 'line', ['2026-10-05', 2]]
+    ])
+  })
+})
+
+describe('testHistoryChart', () => {
+  it('shows mean and max duration in seconds, and failures', () => {
+    const option = testHistoryChart(
+      [{date: '2026-10-05', count: 2, failures: 1, meanMs: 1500, maxMs: 2000}],
+      theme
+    )
+    expect(option.series.map(s => [s.name, s.data[0]])).toEqual([
+      ['Mean', ['2026-10-05', 1.5]],
+      ['Max', ['2026-10-05', 2]],
+      ['Failures', ['2026-10-05', 1]]
+    ])
+  })
+})
+
+describe('seriesTooltipRows', () => {
+  it('labels each series value of an axis tooltip by its name', () => {
+    expect(
+      seriesTooltipRows(['Runs', 'Failures'])([
+        ['2026-10-05', 4],
+        ['2026-10-05', 1]
+      ])
+    ).toEqual([
+      {label: 'Date', value: '2026-10-05'},
+      {label: 'Runs', value: '4'},
+      {label: 'Failures', value: '1'}
+    ])
   })
 })

@@ -16,9 +16,9 @@ npm test
 
 step 'Action bundle matches the source'
 npm run package
-if ! git diff --quiet -- packages/collector/dist; then
-  echo 'packages/collector/dist differs from a fresh build. Run npm run package and commit it.' >&2
-  git diff --stat -- packages/collector/dist >&2
+if ! git diff --quiet -- packages/collector/dist report/dist || [ -n "$(git ls-files --others --exclude-standard -- packages/collector/dist report/dist)" ]; then
+  echo "An Action bundle differs from a fresh build. Run npm run package and commit it." >&2
+  git status --short -- packages/collector/dist report/dist >&2
   exit 1
 fi
 echo '  dist is up to date'

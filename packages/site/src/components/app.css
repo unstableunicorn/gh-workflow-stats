@@ -21,3 +21,9 @@
 .site-header p {
   margin: 0;
 }
+
+.site-header nav {
+  display: flex;
+  gap: var(--space-3);
+  margin-left: auto;
+}

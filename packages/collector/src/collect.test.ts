@@ -1,7 +1,19 @@
 import {describe, expect, it} from 'vitest'
-import type {RunShard, Summary, SyncState} from '@gh-workflow-stats/core'
+import type {
+  RunShard,
+  Summary,
+  SyncState,
+  TestShard
+} from '@gh-workflow-stats/core'
 import {collect, type CollectConfig} from './collect'
-import type {ApiRun, DataStore, FileWrite, RunsApi} from './github'
+import type {
+  ApiRun,
+  ArtifactsApi,
+  DataStore,
+  FileWrite,
+  RunsApi
+} from './github'
+import {RateLimitError} from './sync'
 
 const NOW = new Date('2026-10-07T12:00:00Z')
 
@@ -28,8 +40,37 @@ function apiRun(
   }
 }
 
-function fakeApi(runs: ApiRun[]): RunsApi {
-  return {
+interface FakeArtifact {
+  name: string
+  content: unknown
+  expired?: boolean
+}
+
+/** Runs and their report artifacts; counts artifact downloads. */
+function fakeApi(
+  runs: ApiRun[],
+  artifacts: Record<number, FakeArtifact[]> = {},
+  opts: {rateLimitDownloadsAfter?: number} = {}
+) {
+  const downloads: number[] = []
+  const byId = new Map<number, FakeArtifact>()
+  let nextId = 1
+  const listed = Object.fromEntries(
+    Object.entries(artifacts).map(([runId, list]) => [
+      runId,
+      list.map(a => {
+        const id = nextId++
+        byId.set(id, a)
+        return {
+          id,
+          name: a.name,
+          expired: a.expired ?? false,
+          size_in_bytes: 100
+        }
+      })
+    ])
+  )
+  const api: RunsApi & ArtifactsApi = {
     async listRuns(created) {
       const [from, to] = created.split('..').map(Date.parse) as [number, number]
       const match = runs.filter(r => {
@@ -40,8 +81,24 @@ function fakeApi(runs: ApiRun[]): RunsApi {
     },
     async listJobs() {
       return []
+    },
+    async listArtifacts(runId) {
+      return listed[runId] ?? []
+    },
+    async downloadText(artifactId) {
+      if (
+        opts.rateLimitDownloadsAfter !== undefined &&
+        downloads.length >= opts.rateLimitDownloadsAfter
+      )
+        throw new RateLimitError('rate limited')
+      downloads.push(artifactId)
+      const a = byId.get(artifactId)
+      return typeof a?.content === 'string'
+        ? a.content
+        : JSON.stringify(a?.content)
     }
   }
+  return Object.assign(api, {downloads})
 }
 
 /** An in-memory data branch: a list of commits, each a full file map. */
@@ -208,5 +265,137 @@ describe('collect', () => {
     await expect(collect(fakeApi([]), store, NOW, config())).rejects.toThrow(
       /state\.json/
     )
+  })
+})
+
+const report = (suite: string, tests: {name: string; status: string}[]) => ({
+  schemaVersion: 1,
+  suite,
+  tests: tests.map(t => ({classname: 'pkg', durationMs: 5, ...t}))
+})
+const artifact = (suite: string, tests: {name: string; status: string}[]) => ({
+  name: `gh-workflow-stats-tests-${suite}.json`,
+  content: report(suite, tests)
+})
+
+describe('collect: test reports', () => {
+  it('stores the report artifacts of each new run in a monthly test shard', async () => {
+    const {store, file} = memoryStore()
+    await collect(
+      fakeApi([apiRun(7, '2026-10-02T00:00:00Z')], {
+        7: [
+          artifact('unit', [
+            {name: 'a', status: 'passed'},
+            {name: 'b', status: 'failed'}
+          ]),
+          {name: 'coverage', content: 'not ours'}
+        ]
+      }),
+      store,
+      NOW,
+      config()
+    )
+    const shard = file<TestShard>('tests/2026-10.json')
+    expect(shard.runs.map(r => [r.runId, r.suite, r.failed])).toEqual([
+      [7, 'unit', ['unit::pkg::b']]
+    ])
+  })
+
+  it('lists suites with recent numbers in the summary', async () => {
+    const {store, file} = memoryStore()
+    await collect(
+      fakeApi(
+        [apiRun(1, '2026-10-02T00:00:00Z'), apiRun(2, '2026-10-02T01:00:00Z')],
+        {
+          1: [artifact('unit', [{name: 'a', status: 'failed'}])],
+          2: [artifact('unit', [{name: 'a', status: 'passed'}])]
+        }
+      ),
+      store,
+      NOW,
+      config()
+    )
+    expect(file<Summary>('summary.json').tests).toEqual({
+      months: ['2026-10'],
+      suites: [
+        {suite: 'unit', recent: {reports: 2, tests: 1, failures: 1, flaky: 1}}
+      ]
+    })
+  })
+
+  it('skips an expired artifact', async () => {
+    const api = fakeApi([apiRun(7, '2026-10-02T00:00:00Z')], {
+      7: [{...artifact('unit', [{name: 'a', status: 'passed'}]), expired: true}]
+    })
+    const {store} = memoryStore()
+    await collect(api, store, NOW, config())
+    expect(api.downloads).toEqual([])
+  })
+
+  it('skips a malformed report with a warning, and keeps the rest', async () => {
+    const {store, file} = memoryStore()
+    const result = await collect(
+      fakeApi([apiRun(7, '2026-10-02T00:00:00Z')], {
+        7: [
+          {name: 'gh-workflow-stats-tests-evil.json', content: '{not json'},
+          artifact('unit', [{name: 'a', status: 'passed'}])
+        ]
+      }),
+      store,
+      NOW,
+      config()
+    )
+    expect(result.warnings).toEqual([
+      expect.stringMatching(/run 7: gh-workflow-stats-tests-evil\.json/)
+    ])
+    expect(
+      file<TestShard>('tests/2026-10.json').runs.map(r => r.suite)
+    ).toEqual(['unit'])
+  })
+
+  it('skips a report whose suite does not match its artifact name', async () => {
+    const {store} = memoryStore()
+    const result = await collect(
+      fakeApi([apiRun(7, '2026-10-02T00:00:00Z')], {
+        7: [
+          {
+            name: 'gh-workflow-stats-tests-unit.json',
+            content: report('other', [])
+          }
+        ]
+      }),
+      store,
+      NOW,
+      config()
+    )
+    expect(result.warnings[0]).toMatch(/suite/)
+  })
+
+  it('keeps runs whose reports it could not fetch, and fetches them next time', async () => {
+    const runs = [
+      apiRun(1, '2026-10-02T00:00:00Z'),
+      apiRun(2, '2026-10-03T00:00:00Z')
+    ]
+    const artifacts = {
+      1: [artifact('unit', [{name: 'a', status: 'passed'}])],
+      2: [artifact('unit', [{name: 'a', status: 'passed'}])]
+    }
+    const {store, file} = memoryStore()
+    const first = await collect(
+      fakeApi(runs, artifacts, {rateLimitDownloadsAfter: 1}),
+      store,
+      NOW,
+      config()
+    )
+    expect(first.complete).toBe(false)
+    expect(file<SyncState>('state.json').pendingTests).toEqual([
+      {runId: 2, attempt: 1, month: '2026-10'}
+    ])
+
+    await collect(fakeApi(runs, artifacts), store, NOW, config())
+    expect(
+      file<TestShard>('tests/2026-10.json').runs.map(r => r.runId)
+    ).toEqual([1, 2])
+    expect(file<SyncState>('state.json').pendingTests).toEqual([])
   })
 })

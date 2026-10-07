@@ -1,6 +1,13 @@
+import {writeFile} from 'node:fs/promises'
+import {join} from 'node:path'
 import {describe, expect, it} from 'vitest'
 import {RateLimitError} from './sync'
-import {octokitDataStore, octokitRunsApi, type Request} from './octokit'
+import {
+  octokitArtifactsApi,
+  octokitDataStore,
+  octokitRunsApi,
+  type Request
+} from './octokit'
 
 const repo = {owner: 'octo-org', repo: 'octo-repo'}
 
@@ -164,5 +171,63 @@ describe('octokitDataStore', () => {
         'm'
       )
     ).rejects.toThrow(/contents: write/)
+  })
+})
+
+describe('octokitArtifactsApi', () => {
+  const noDownload = async () => {
+    throw new Error('not used')
+  }
+
+  it('pages through a run’s artifacts', async () => {
+    const {request, calls} = fakeRequest({
+      'GET /repos/{owner}/{repo}/actions/runs/{run_id}/artifacts': p => ({
+        artifacts: Array.from({length: p.page === 1 ? 100 : 1}, (_, i) => ({
+          id: i,
+          name: `a${i}`,
+          expired: false,
+          size_in_bytes: 1
+        }))
+      })
+    })
+    const list = await octokitArtifactsApi(
+      request,
+      repo,
+      noDownload
+    ).listArtifacts(9)
+    expect(list).toHaveLength(101)
+    expect(calls[0]?.params).toMatchObject({run_id: 9, per_page: 100, page: 1})
+  })
+
+  it('reads the single file the download writes', async () => {
+    const api = octokitArtifactsApi(
+      fakeRequest({}).request,
+      repo,
+      async (id, runId, dir) => {
+        await writeFile(join(dir, `report-${id}-${runId}.json`), '{"ok":1}')
+      }
+    )
+    expect(await api.downloadText(3, 9)).toBe('{"ok":1}')
+  })
+
+  it('refuses a download that is not exactly one file', async () => {
+    const api = octokitArtifactsApi(
+      fakeRequest({}).request,
+      repo,
+      async (_id, _run, dir) => {
+        await writeFile(join(dir, 'a.json'), '{}')
+        await writeFile(join(dir, 'b.json'), '{}')
+      }
+    )
+    await expect(api.downloadText(3, 9)).rejects.toThrow(/2 files/)
+  })
+
+  it('names the missing permission when listing is refused', async () => {
+    const request: Request = async () => {
+      throw httpError(403, {'x-ratelimit-remaining': '900'})
+    }
+    await expect(
+      octokitArtifactsApi(request, repo, noDownload).listArtifacts(9)
+    ).rejects.toThrow(/actions: read/)
   })
 })

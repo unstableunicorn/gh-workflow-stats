@@ -1,7 +1,7 @@
 // ECharts options for the workflow view, built from data and theme colours.
 // Options hold no HTML: tooltips are built as DOM text from tooltipRows().
 
-import type {DayStats} from '@gh-workflow-stats/core'
+import type {DayStats, TestDay} from '@gh-workflow-stats/core'
 import {formatDuration} from './format'
 import type {DurationPoint, Outcome} from './workflow'
 
@@ -147,4 +147,97 @@ export function dailyTooltipRows(
       value: rate[1] === null ? '—' : `${String(rate[1])}%`
     }
   ]
+}
+
+/** Test executions per day as bars and failures as a line on a second axis. */
+export function testsDailyChart(
+  days: {date: string; executions: number; failures: number}[],
+  theme: Theme
+) {
+  const base = axes(theme, 'Executions')
+  return {
+    ...base,
+    tooltip: {trigger: 'axis' as const},
+    yAxis: [
+      base.yAxis,
+      {
+        ...base.yAxis,
+        name: 'Failures',
+        minInterval: 1,
+        splitLine: {show: false}
+      }
+    ],
+    series: [
+      {
+        name: 'Test executions',
+        type: 'bar' as const,
+        itemStyle: {color: theme.accent},
+        data: days.map(d => [d.date, d.executions] as [string, number])
+      },
+      {
+        name: 'Failures',
+        type: 'line' as const,
+        yAxisIndex: 1,
+        itemStyle: {color: theme.failure},
+        data: days.map(d => [d.date, d.failures] as [string, number])
+      }
+    ]
+  }
+}
+
+/** One test's mean and max duration (seconds) per day, with failures as bars. */
+export function testHistoryChart(days: TestDay[], theme: Theme) {
+  const base = axes(theme, 'Seconds')
+  const seconds = (ms: number) => ms / 1000
+  return {
+    ...base,
+    tooltip: {trigger: 'axis' as const},
+    yAxis: [
+      base.yAxis,
+      {
+        ...base.yAxis,
+        name: 'Failures',
+        minInterval: 1,
+        splitLine: {show: false}
+      }
+    ],
+    series: [
+      {
+        name: 'Mean',
+        type: 'line' as const,
+        itemStyle: {color: theme.accent},
+        data: days.map(d => [d.date, seconds(d.meanMs)] as [string, number])
+      },
+      {
+        name: 'Max',
+        type: 'line' as const,
+        itemStyle: {color: theme.other},
+        data: days.map(d => [d.date, seconds(d.maxMs)] as [string, number])
+      },
+      {
+        name: 'Failures',
+        type: 'bar' as const,
+        yAxisIndex: 1,
+        itemStyle: {color: theme.failure},
+        data: days.map(d => [d.date, d.failures] as [string, number])
+      }
+    ]
+  }
+}
+
+/** Tooltip rows for an axis tooltip over `[date, value]` series named `names`. */
+export function seriesTooltipRows(names: string[]) {
+  return (data: unknown): {label: string; value: string}[] | null => {
+    if (!Array.isArray(data) || data.length !== names.length) return null
+    const points = data as unknown[]
+    const first = points[0]
+    if (!Array.isArray(first)) return null
+    return [
+      {label: 'Date', value: String(first[0])},
+      ...points.map((p, i) => ({
+        label: names[i] ?? '',
+        value: Array.isArray(p) && p[1] !== null ? String(p[1]) : '—'
+      }))
+    ]
+  }
 }

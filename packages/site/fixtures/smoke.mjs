@@ -68,7 +68,9 @@ try {
   await page.goto(`${origin}/sub/path/`)
   await page.waitForSelector('table caption')
   check(
-    (await page.locator('tbody tr').count()) === 2,
+    (await page
+      .locator('table:has(caption:has-text("Workflows")) tbody tr')
+      .count()) === 2,
     'overview lists both fixture workflows'
   )
 
@@ -92,6 +94,28 @@ try {
   check(
     (await page.locator('table b').count()) === 0,
     'a branch name with HTML renders as text'
+  )
+
+  await page.click('nav >> text=Tests')
+  await page.waitForSelector('caption:has-text("Flaky tests")')
+  check(
+    (await page.locator('tr:has-text("sometimes fails")').count()) >= 1,
+    'the flaky test is listed'
+  )
+  check(
+    (await page.locator('main img').count()) === 0,
+    'a test name with HTML renders as text'
+  )
+  await page.click('a:has-text("sometimes fails") >> nth=0')
+  await page.waitForSelector('#test-title')
+  await page.waitForSelector('.chart canvas', {timeout: 10_000}).catch(() => {})
+  check(
+    (await page.locator('#test-title').innerText()) === 'pkg::sometimes fails',
+    'a test link opens its history'
+  )
+  check(
+    (await page.locator('.chart canvas').count()) >= 1,
+    'the test history chart renders'
   )
 } finally {
   await browser.close()

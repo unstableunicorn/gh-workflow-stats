@@ -2,9 +2,11 @@
 
 const REPOSITORY = /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/
 
-/** A duration as `4s`, `3m 05s` or `1h 02m`; a dash for null. */
+/** A duration as `250ms`, `1.5s`, `14s`, `3m 05s` or `1h 02m`; a dash for null. */
 export function formatDuration(ms: number | null): string {
   if (ms === null) return '—'
+  if (ms < 1000) return `${Math.round(ms)}ms`
+  if (ms < 10_000) return `${Math.round(ms / 100) / 10}s`
   const seconds = Math.round(ms / 1000)
   if (seconds < 60) return `${seconds}s`
   const minutes = Math.floor(seconds / 60)
