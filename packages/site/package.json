@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "smoke": "node fixtures/smoke.mjs"
   },
   "dependencies": {
     "@gh-workflow-stats/core": "0.1.0",
@@ -16,6 +17,7 @@
     "preact": "^10.29.8"
   },
   "devDependencies": {
+    "playwright": "^1.63.0",
     "vite": "^8.3.3"
   }
 }
