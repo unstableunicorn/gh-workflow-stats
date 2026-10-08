@@ -500,25 +500,65 @@
   },
   {
    "id": 37712709198,
-   "attempt": 1,
+   "attempt": 2,
    "workflowId": 377189126,
    "workflowName": "CI",
    "workflowPath": ".github/workflows/ci.yml",
    "event": "pull_request",
    "branch": "flaky-test-experiment",
    "headSha": "2680c3d6d9d356271d67a8e2a4068f7d99745dd7",
-   "conclusion": "failure",
+   "conclusion": "success",
    "createdAt": "2026-10-08T01:23:45Z",
-   "startedAt": "2026-10-08T01:23:45Z",
-   "updatedAt": "2026-10-08T01:24:45Z",
+   "startedAt": "2026-10-08T01:25:52Z",
+   "updatedAt": "2026-10-08T01:26:46Z",
    "jobs": [
     {
-     "id": 113102066917,
+     "id": 113102640159,
      "name": "scripts/ci.sh",
-     "conclusion": "failure",
-     "createdAt": "2026-10-08T01:23:45Z",
-     "startedAt": "2026-10-08T01:23:48Z",
-     "completedAt": "2026-10-08T01:24:44Z"
+     "conclusion": "success",
+     "createdAt": "2026-10-08T01:25:54Z",
+     "startedAt": "2026-10-08T01:25:55Z",
+     "completedAt": "2026-10-08T01:26:46Z"
+    }
+   ]
+  },
+  {
+   "id": 37712808438,
+   "attempt": 1,
+   "workflowId": 377189129,
+   "workflowName": "Dashboard",
+   "workflowPath": ".github/workflows/dashboard.yml",
+   "event": "workflow_dispatch",
+   "branch": "main",
+   "headSha": "c259636e63a4286517bcf4456e4067584af93dce",
+   "conclusion": "success",
+   "createdAt": "2026-10-08T01:24:56Z",
+   "startedAt": "2026-10-08T01:24:56Z",
+   "updatedAt": "2026-10-08T01:25:44Z",
+   "jobs": [
+    {
+     "id": 113102387837,
+     "name": "Collect workflow runs",
+     "conclusion": "success",
+     "createdAt": "2026-10-08T01:24:57Z",
+     "startedAt": "2026-10-08T01:24:58Z",
+     "completedAt": "2026-10-08T01:25:07Z"
+    },
+    {
+     "id": 113102432403,
+     "name": "Build site",
+     "conclusion": "success",
+     "createdAt": "2026-10-08T01:25:07Z",
+     "startedAt": "2026-10-08T01:25:09Z",
+     "completedAt": "2026-10-08T01:25:29Z"
+    },
+    {
+     "id": 113102532488,
+     "name": "Deploy to GitHub Pages",
+     "conclusion": "success",
+     "createdAt": "2026-10-08T01:25:30Z",
+     "startedAt": "2026-10-08T01:25:33Z",
+     "completedAt": "2026-10-08T01:25:44Z"
     }
    ]
   }
