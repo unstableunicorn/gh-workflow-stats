@@ -47,6 +47,7 @@ export interface ApiArtifact {
   name: string
   expired: boolean
   size_in_bytes: number
+  created_at: string | null
 }
 
 /** Lists a run's artifacts and downloads one as text. */
