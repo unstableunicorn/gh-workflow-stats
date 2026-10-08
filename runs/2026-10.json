@@ -433,6 +433,94 @@
      "completedAt": "2026-10-08T01:16:46Z"
     }
    ]
+  },
+  {
+   "id": 37712219063,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "push",
+   "branch": "main",
+   "headSha": "c259636e63a4286517bcf4456e4067584af93dce",
+   "conclusion": "success",
+   "createdAt": "2026-10-08T01:17:55Z",
+   "startedAt": "2026-10-08T01:17:55Z",
+   "updatedAt": "2026-10-08T01:18:54Z",
+   "jobs": [
+    {
+     "id": 113100492284,
+     "name": "scripts/ci.sh",
+     "conclusion": "success",
+     "createdAt": "2026-10-08T01:17:55Z",
+     "startedAt": "2026-10-08T01:17:57Z",
+     "completedAt": "2026-10-08T01:18:54Z"
+    }
+   ]
+  },
+  {
+   "id": 37712219085,
+   "attempt": 1,
+   "workflowId": 377189129,
+   "workflowName": "Dashboard",
+   "workflowPath": ".github/workflows/dashboard.yml",
+   "event": "push",
+   "branch": "main",
+   "headSha": "c259636e63a4286517bcf4456e4067584af93dce",
+   "conclusion": "success",
+   "createdAt": "2026-10-08T01:17:55Z",
+   "startedAt": "2026-10-08T01:17:55Z",
+   "updatedAt": "2026-10-08T01:23:20Z",
+   "jobs": [
+    {
+     "id": 113100492920,
+     "name": "Collect workflow runs",
+     "conclusion": "success",
+     "createdAt": "2026-10-08T01:17:55Z",
+     "startedAt": "2026-10-08T01:17:57Z",
+     "completedAt": "2026-10-08T01:18:09Z"
+    },
+    {
+     "id": 113100557416,
+     "name": "Build site",
+     "conclusion": "success",
+     "createdAt": "2026-10-08T01:18:09Z",
+     "startedAt": "2026-10-08T01:18:11Z",
+     "completedAt": "2026-10-08T01:18:26Z"
+    },
+    {
+     "id": 113100634942,
+     "name": "Deploy to GitHub Pages",
+     "conclusion": "success",
+     "createdAt": "2026-10-08T01:18:26Z",
+     "startedAt": "2026-10-08T01:18:29Z",
+     "completedAt": "2026-10-08T01:23:19Z"
+    }
+   ]
+  },
+  {
+   "id": 37712709198,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "pull_request",
+   "branch": "flaky-test-experiment",
+   "headSha": "2680c3d6d9d356271d67a8e2a4068f7d99745dd7",
+   "conclusion": "failure",
+   "createdAt": "2026-10-08T01:23:45Z",
+   "startedAt": "2026-10-08T01:23:45Z",
+   "updatedAt": "2026-10-08T01:24:45Z",
+   "jobs": [
+    {
+     "id": 113102066917,
+     "name": "scripts/ci.sh",
+     "conclusion": "failure",
+     "createdAt": "2026-10-08T01:23:45Z",
+     "startedAt": "2026-10-08T01:23:48Z",
+     "completedAt": "2026-10-08T01:24:44Z"
+    }
+   ]
   }
  ]
 }

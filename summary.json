@@ -1,8 +1,8 @@
 {
  "schemaVersion": 1,
  "repository": "unstableunicorn/gh-workflow-stats",
- "generatedAt": "2026-10-08T01:18:00.557Z",
- "syncedThrough": "2026-10-07T01:18:00.557Z",
+ "generatedAt": "2026-10-08T01:25:01.249Z",
+ "syncedThrough": "2026-10-07T01:25:01.249Z",
  "recentDays": 30,
  "months": [
   "2026-10"
@@ -13,11 +13,11 @@
    "name": "CI",
    "path": ".github/workflows/ci.yml",
    "recent": {
-    "runs": 8,
-    "success": 7,
-    "failure": 0,
-    "successRate": 1,
-    "durationP50Ms": 58000,
+    "runs": 10,
+    "success": 8,
+    "failure": 1,
+    "successRate": 0.8888888888888888,
+    "durationP50Ms": 59000,
     "durationP95Ms": 72000,
     "queueP50Ms": 2000
    }
@@ -27,12 +27,12 @@
    "name": "Dashboard",
    "path": ".github/workflows/dashboard.yml",
    "recent": {
-    "runs": 6,
-    "success": 6,
+    "runs": 7,
+    "success": 7,
     "failure": 0,
     "successRate": 1,
-    "durationP50Ms": 48000,
-    "durationP95Ms": 107000,
+    "durationP50Ms": 50000,
+    "durationP95Ms": 325000,
     "queueP50Ms": 3000
    }
   }
@@ -45,9 +45,9 @@
    {
     "suite": "unit",
     "recent": {
-     "reports": 5,
-     "tests": 172,
-     "failures": 0,
+     "reports": 7,
+     "tests": 173,
+     "failures": 1,
      "flaky": 0
     }
    }
