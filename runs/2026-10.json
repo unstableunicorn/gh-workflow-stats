@@ -345,6 +345,94 @@
      "completedAt": "2026-10-07T21:21:53Z"
     }
    ]
+  },
+  {
+   "id": 37695831564,
+   "attempt": 1,
+   "workflowId": 377189129,
+   "workflowName": "Dashboard",
+   "workflowPath": ".github/workflows/dashboard.yml",
+   "event": "push",
+   "branch": "main",
+   "headSha": "79def60adc02cda3b3e8337e8006cb8e382991f5",
+   "conclusion": "success",
+   "createdAt": "2026-10-07T22:23:06Z",
+   "startedAt": "2026-10-07T22:23:06Z",
+   "updatedAt": "2026-10-07T22:23:49Z",
+   "jobs": [
+    {
+     "id": 113047196319,
+     "name": "Collect workflow runs",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T22:23:07Z",
+     "startedAt": "2026-10-07T22:23:08Z",
+     "completedAt": "2026-10-07T22:23:16Z"
+    },
+    {
+     "id": 113047256166,
+     "name": "Build site",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T22:23:17Z",
+     "startedAt": "2026-10-07T22:23:19Z",
+     "completedAt": "2026-10-07T22:23:36Z"
+    },
+    {
+     "id": 113047367960,
+     "name": "Deploy to GitHub Pages",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T22:23:36Z",
+     "startedAt": "2026-10-07T22:23:39Z",
+     "completedAt": "2026-10-07T22:23:48Z"
+    }
+   ]
+  },
+  {
+   "id": 37695831717,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "push",
+   "branch": "main",
+   "headSha": "79def60adc02cda3b3e8337e8006cb8e382991f5",
+   "conclusion": "success",
+   "createdAt": "2026-10-07T22:23:06Z",
+   "startedAt": "2026-10-07T22:23:06Z",
+   "updatedAt": "2026-10-07T22:24:00Z",
+   "jobs": [
+    {
+     "id": 113047196971,
+     "name": "scripts/ci.sh",
+     "conclusion": "success",
+     "createdAt": "2026-10-07T22:23:07Z",
+     "startedAt": "2026-10-07T22:23:09Z",
+     "completedAt": "2026-10-07T22:23:59Z"
+    }
+   ]
+  },
+  {
+   "id": 37712018180,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "pull_request",
+   "branch": "newest-report-artifact",
+   "headSha": "ae1089f833b8e87b676a8237865505e76c8933e7",
+   "conclusion": "success",
+   "createdAt": "2026-10-08T01:15:34Z",
+   "startedAt": "2026-10-08T01:15:34Z",
+   "updatedAt": "2026-10-08T01:16:46Z",
+   "jobs": [
+    {
+     "id": 113099848439,
+     "name": "scripts/ci.sh",
+     "conclusion": "success",
+     "createdAt": "2026-10-08T01:15:34Z",
+     "startedAt": "2026-10-08T01:15:37Z",
+     "completedAt": "2026-10-08T01:16:46Z"
+    }
+   ]
   }
  ]
 }
