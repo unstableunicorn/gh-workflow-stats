@@ -9,7 +9,7 @@ import {
   type RunRecord,
   type TestShard
 } from '@gh-workflow-stats/core'
-import type {ArtifactsApi} from './github'
+import type {ApiArtifact, ArtifactsApi} from './github'
 import {RateLimitError} from './sync'
 
 /** Larger report artifacts are skipped: 20 MB is far beyond any real suite. */
@@ -33,6 +33,20 @@ export interface TestsResult {
 
 class Stop extends Error {}
 
+/** The newest artifact of each name: a re-run's report replaces the earlier attempt's. */
+function newestByName(artifacts: ApiArtifact[]): ApiArtifact[] {
+  const newest = new Map<string, ApiArtifact>()
+  for (const a of artifacts) {
+    const held = newest.get(a.name)
+    const later =
+      held === undefined ||
+      (a.created_at ?? '') > (held.created_at ?? '') ||
+      (a.created_at === held.created_at && a.id > held.id)
+    if (later) newest.set(a.name, a)
+  }
+  return [...newest.values()]
+}
+
 /** Adds each queued run's reports to its month's shard; see TestsResult. */
 export async function collectTests(opts: TestsOptions): Promise<TestsResult> {
   const shards = new Map<string, TestShard>()
@@ -48,8 +62,10 @@ export async function collectTests(opts: TestsOptions): Promise<TestsResult> {
     if (run === undefined) continue
     try {
       spend()
-      const artifacts = (await opts.api.listArtifacts(run.id)).filter(
-        a => a.name.startsWith(TEST_ARTIFACT_PREFIX) && !a.expired
+      const artifacts = newestByName(
+        (await opts.api.listArtifacts(run.id)).filter(
+          a => a.name.startsWith(TEST_ARTIFACT_PREFIX) && !a.expired
+        )
       )
       for (const artifact of artifacts) {
         if (artifact.size_in_bytes > MAX_ARTIFACT_BYTES) {

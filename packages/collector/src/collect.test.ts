@@ -44,6 +44,7 @@ interface FakeArtifact {
   name: string
   content: unknown
   expired?: boolean
+  createdAt?: string
 }
 
 /** Runs and their report artifacts; counts artifact downloads. */
@@ -65,7 +66,8 @@ function fakeApi(
           id,
           name: a.name,
           expired: a.expired ?? false,
-          size_in_bytes: 100
+          size_in_bytes: 100,
+          created_at: a.createdAt ?? '2026-10-02T00:10:00Z'
         }
       })
     ])
@@ -321,6 +323,29 @@ describe('collect: test reports', () => {
         {suite: 'unit', recent: {reports: 2, tests: 1, failures: 1, flaky: 1}}
       ]
     })
+  })
+
+  it('uses only the newest report of each name, as a re-run leaves older ones', async () => {
+    const {store, file} = memoryStore()
+    await collect(
+      fakeApi([apiRun(7, '2026-10-02T00:00:00Z', {run_attempt: 2})], {
+        7: [
+          {
+            ...artifact('unit', [{name: 'a', status: 'failed'}]),
+            createdAt: '2026-10-02T00:10:00Z'
+          },
+          {
+            ...artifact('unit', [{name: 'a', status: 'passed'}]),
+            createdAt: '2026-10-02T00:30:00Z'
+          }
+        ]
+      }),
+      store,
+      NOW,
+      config()
+    )
+    const runs = file<TestShard>('tests/2026-10.json').runs
+    expect(runs.map(r => [r.attempt, r.failed])).toEqual([[2, []]])
   })
 
   it('skips an expired artifact', async () => {

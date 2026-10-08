@@ -99314,6 +99314,15 @@ async function listWindow(api, from, to, spend) {
 var MAX_ARTIFACT_BYTES = 20 * 1024 * 1024;
 var Stop2 = class extends Error {
 };
+function newestByName(artifacts) {
+  const newest = /* @__PURE__ */ new Map();
+  for (const a of artifacts) {
+    const held = newest.get(a.name);
+    const later = held === void 0 || (a.created_at ?? "") > (held.created_at ?? "") || a.created_at === held.created_at && a.id > held.id;
+    if (later) newest.set(a.name, a);
+  }
+  return [...newest.values()];
+}
 async function collectTests(opts) {
   const shards = /* @__PURE__ */ new Map();
   const warnings = [];
@@ -99327,8 +99336,10 @@ async function collectTests(opts) {
     if (run === void 0) continue;
     try {
       spend();
-      const artifacts = (await opts.api.listArtifacts(run.id)).filter(
-        (a) => a.name.startsWith(TEST_ARTIFACT_PREFIX) && !a.expired
+      const artifacts = newestByName(
+        (await opts.api.listArtifacts(run.id)).filter(
+          (a) => a.name.startsWith(TEST_ARTIFACT_PREFIX) && !a.expired
+        )
       );
       for (const artifact of artifacts) {
         if (artifact.size_in_bytes > MAX_ARTIFACT_BYTES) {
