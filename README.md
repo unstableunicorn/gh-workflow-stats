@@ -74,6 +74,38 @@ schedule works too, but GitHub runs schedules late or skips them under load.
 push to any branch. The collector only writes its data branch, but a ruleset
 that requires pull requests on your default branch makes that a guarantee.
 
+**When the default branch cannot be protected** (a private repository on
+GitHub Free has no branch protection or rulesets), keep write access out of
+the repository altogether: write the data to a separate private repository,
+with a GitHub App token that can write only there. The collector job then
+needs only `actions: read`:
+
+1. Create a private repository for the data, for example `octo-org/octo-stats`
+2. Create a GitHub App with one repository permission, **Contents: Read and
+   write**, and install it on the data repository only
+3. Store the App's client ID and private key as secrets of the repository
+   being measured
+4. Mint a token for the data repository in the collector job:
+
+```yaml
+    permissions:
+      actions: read
+    steps:
+      - id: data-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ secrets.STATS_APP_CLIENT_ID }}
+          private-key: ${{ secrets.STATS_APP_PRIVATE_KEY }}
+          repositories: octo-stats
+          permission-contents: write
+      - uses: unstableunicorn/gh-workflow-stats@<commit-sha>
+        with:
+          data-repository: octo-org/octo-stats
+          data-token: ${{ steps.data-token.outputs.token }}
+```
+
+The data branch must still not be the data repository's default branch.
+
 **GitHub Pages sites are public**, except on GitHub Enterprise Cloud. For a
 private repository, publish the site to Cloudflare Pages with Cloudflare
 Access in front of it _before_ the first deploy.
@@ -82,8 +114,10 @@ Access in front of it _before_ the first deploy.
 
 | Input           | Default                  | What                                                              |
 | --------------- | ------------------------ | ----------------------------------------------------------------- |
-| `token`         | `${{ github.token }}`    | Needs `actions: read` and `contents: write`                       |
+| `token`         | `${{ github.token }}`    | Needs `actions: read`; also `contents: write` without `data-token` |
 | `data-branch`   | `gh-workflow-stats-data` | Where the JSON goes. Must not be the default branch               |
+| `data-repository` | this repository        | `owner/name` to write the data to                                  |
+| `data-token`    | `token`                  | A token that can write `data-repository`                          |
 | `backfill-days` | `90`                     | History to collect on the first run                               |
 | `max-requests`  | `300`                    | Approximate API requests per run; the next run continues          |
 | `recent-days`   | `30`                     | The window for the headline numbers in `summary.json`             |

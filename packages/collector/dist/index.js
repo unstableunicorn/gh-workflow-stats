@@ -99597,7 +99597,8 @@ function toJson(value) {
 
 // src/config.ts
 var BRANCH = /^[A-Za-z0-9][A-Za-z0-9._/-]*$/;
-function readConfig(input, env, defaultBranch) {
+var REPOSITORY = /^([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)$/;
+function readConfig(input, env) {
   const required = (name) => {
     const value = input(name).trim();
     if (value === "") throw new Error(`Input ${name} is required`);
@@ -99617,19 +99618,31 @@ function readConfig(input, env, defaultBranch) {
     throw new Error(
       `Input data-branch is not a plain branch name: ${JSON.stringify(dataBranch)}`
     );
-  if (dataBranch === defaultBranch)
+  const dataRepository = input("data-repository").trim() || `${owner}/${repo}`;
+  const match = REPOSITORY.exec(dataRepository);
+  if (match?.[1] === void 0 || match[2] === void 0 || dataRepository.includes(".."))
     throw new Error(
-      `Input data-branch must not be the default branch (${defaultBranch})`
+      `Input data-repository is not owner/name: ${JSON.stringify(dataRepository)}`
     );
+  const token = required("token");
   return {
-    token: required("token"),
+    token,
     owner,
     repo,
+    dataToken: input("data-token").trim() || token,
+    dataOwner: match[1],
+    dataRepo: match[2],
     dataBranch,
     backfillDays: count("backfill-days"),
     maxRequests: count("max-requests"),
     recentDays: count("recent-days")
   };
+}
+function assertNotDefaultBranch(config, defaultBranch) {
+  if (config.dataBranch === defaultBranch)
+    throw new Error(
+      `Input data-branch must not be the default branch (${defaultBranch}) of ${config.dataOwner}/${config.dataRepo}`
+    );
 }
 
 // src/octokit.ts
@@ -99800,12 +99813,22 @@ function octokitArtifactsApi(request2, repo, download) {
 
 // src/index.ts
 async function main() {
-  const token = getInput("token");
-  const octokit = getOctokit(token);
-  const request2 = octokit.request;
-  const defaultBranch = context4.payload.repository?.default_branch ?? (await octokit.rest.repos.get(context4.repo)).data.default_branch;
-  const config = readConfig(getInput, process.env, defaultBranch);
+  const config = readConfig(getInput, process.env);
+  const request2 = getOctokit(config.token).request;
+  const dataOctokit = getOctokit(config.dataToken);
   const repo = { owner: config.owner, repo: config.repo };
+  const dataRepo = { owner: config.dataOwner, repo: config.dataRepo };
+  const sameRepo = config.dataOwner === config.owner && config.dataRepo === config.repo;
+  const defaultBranch = (sameRepo ? context4.payload.repository?.default_branch : void 0) ?? await dataOctokit.rest.repos.get(dataRepo).then(
+    (r) => r.data.default_branch,
+    (error2) => {
+      throw new Error(
+        `Cannot read data-repository ${config.dataOwner}/${config.dataRepo}: ${error2 instanceof Error ? error2.message : String(error2)}. Check the name, and that data-token can access it.`,
+        { cause: error2 }
+      );
+    }
+  );
+  assertNotDefaultBranch(config, defaultBranch);
   const artifacts = new DefaultArtifactClient();
   const api = {
     ...octokitRunsApi(request2, repo),
@@ -99823,7 +99846,11 @@ async function main() {
   };
   const result = await collect(
     api,
-    octokitDataStore(request2, repo, config.dataBranch),
+    octokitDataStore(
+      dataOctokit.request,
+      dataRepo,
+      config.dataBranch
+    ),
     // eslint-disable-next-line no-restricted-syntax -- the wiring layer owns the clock
     /* @__PURE__ */ new Date(),
     {

@@ -4,7 +4,7 @@ import * as core from '@actions/core'
 import {DefaultArtifactClient} from '@actions/artifact'
 import {context, getOctokit} from '@actions/github'
 import {collect} from './collect'
-import {readConfig} from './config'
+import {assertNotDefaultBranch, readConfig} from './config'
 import {
   octokitArtifactsApi,
   octokitDataStore,
@@ -13,14 +13,27 @@ import {
 } from './octokit'
 
 async function main(): Promise<void> {
-  const token = core.getInput('token')
-  const octokit = getOctokit(token)
-  const request = octokit.request as unknown as Request
-  const defaultBranch =
-    (context.payload.repository?.default_branch as string | undefined) ??
-    (await octokit.rest.repos.get(context.repo)).data.default_branch
-  const config = readConfig(core.getInput, process.env, defaultBranch)
+  const config = readConfig(core.getInput, process.env)
+  const request = getOctokit(config.token).request as unknown as Request
+  const dataOctokit = getOctokit(config.dataToken)
   const repo = {owner: config.owner, repo: config.repo}
+  const dataRepo = {owner: config.dataOwner, repo: config.dataRepo}
+  const sameRepo =
+    config.dataOwner === config.owner && config.dataRepo === config.repo
+  const defaultBranch =
+    (sameRepo
+      ? (context.payload.repository?.default_branch as string | undefined)
+      : undefined) ??
+    (await dataOctokit.rest.repos.get(dataRepo).then(
+      r => r.data.default_branch,
+      (error: unknown) => {
+        throw new Error(
+          `Cannot read data-repository ${config.dataOwner}/${config.dataRepo}: ${error instanceof Error ? error.message : String(error)}. Check the name, and that data-token can access it.`,
+          {cause: error}
+        )
+      }
+    ))
+  assertNotDefaultBranch(config, defaultBranch)
 
   const artifacts = new DefaultArtifactClient()
   const api = {
@@ -39,7 +52,11 @@ async function main(): Promise<void> {
   }
   const result = await collect(
     api,
-    octokitDataStore(request, repo, config.dataBranch),
+    octokitDataStore(
+      dataOctokit.request as unknown as Request,
+      dataRepo,
+      config.dataBranch
+    ),
     // eslint-disable-next-line no-restricted-syntax -- the wiring layer owns the clock
     new Date(),
     {
