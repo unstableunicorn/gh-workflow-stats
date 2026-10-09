@@ -1,10 +1,11 @@
 name: Dashboard
 
-on:
-  push:
-    branches: [main]
-  schedule:
-    - cron: '17 * * * *'
+# Runs main's copy after every CI run, PRs from forks included. It never checks
+# out PR code, and the collector validates report artifacts as untrusted data.
+on: # zizmor: ignore[dangerous-triggers] no PR code or trusted PR data is used
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
   workflow_dispatch:
 
 permissions: {}
@@ -20,6 +21,7 @@ defaults:
 jobs:
   collect:
     name: Collect workflow runs
+    if: github.repository == 'unstableunicorn/gh-workflow-stats' # not in forks of this repo
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:

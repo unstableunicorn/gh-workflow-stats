@@ -50,8 +50,9 @@ build and Pages deploy jobs):
 
 ```yaml
 on:
-  schedule:
-    - cron: '17 * * * *'
+  workflow_run: # after every CI run, so new runs and test reports arrive promptly
+    workflows: [CI]
+    types: [completed]
   workflow_dispatch:
 
 jobs:
@@ -63,6 +64,11 @@ jobs:
     steps:
       - uses: unstableunicorn/gh-workflow-stats@<commit-sha>
 ```
+
+`workflow_run` always runs your default branch's copy of the workflow, even
+when a pull request from a fork triggered it, and the collector never runs or
+trusts pull request code: it treats report artifacts as untrusted data. A
+schedule works too, but GitHub runs schedules late or skips them under load.
 
 **Protect your default branch.** `contents: write` on `GITHUB_TOKEN` can
 push to any branch. The collector only writes its data branch, but a ruleset
@@ -149,7 +155,8 @@ an existing branch it did not create.
 - A flaky test is only found when both results come from runs at the same
   commit and suite: a re-run, or a push and a pull request run of one commit
 - GitHub keeps run history for a limited time, and `GITHUB_TOKEN` gets about
-  1,000 API requests an hour per repository. Run the collector at least daily
+  1,000 API requests an hour per repository. A collection that stops early
+  resumes the next time the workflow runs
 
 ## Development
 
