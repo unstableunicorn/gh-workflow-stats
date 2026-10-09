@@ -889,6 +889,70 @@
      "completedAt": "2026-10-09T11:07:07Z"
     }
    ]
+  },
+  {
+   "id": 37921765724,
+   "attempt": 1,
+   "workflowId": 377189129,
+   "workflowName": "Dashboard",
+   "workflowPath": ".github/workflows/dashboard.yml",
+   "event": "workflow_run",
+   "branch": "main",
+   "headSha": "87de64f81184af7eb948b126bb71eb6060db3f22",
+   "conclusion": "success",
+   "createdAt": "2026-10-09T11:07:10Z",
+   "startedAt": "2026-10-09T11:07:10Z",
+   "updatedAt": "2026-10-09T11:07:58Z",
+   "jobs": [
+    {
+     "id": 113791120290,
+     "name": "Collect workflow runs",
+     "conclusion": "success",
+     "createdAt": "2026-10-09T11:07:11Z",
+     "startedAt": "2026-10-09T11:07:13Z",
+     "completedAt": "2026-10-09T11:07:25Z"
+    },
+    {
+     "id": 113791198627,
+     "name": "Build site",
+     "conclusion": "success",
+     "createdAt": "2026-10-09T11:07:25Z",
+     "startedAt": "2026-10-09T11:07:27Z",
+     "completedAt": "2026-10-09T11:07:43Z"
+    },
+    {
+     "id": 113791297703,
+     "name": "Deploy to GitHub Pages",
+     "conclusion": "success",
+     "createdAt": "2026-10-09T11:07:43Z",
+     "startedAt": "2026-10-09T11:07:47Z",
+     "completedAt": "2026-10-09T11:07:57Z"
+    }
+   ]
+  },
+  {
+   "id": 37922189591,
+   "attempt": 1,
+   "workflowId": 377189126,
+   "workflowName": "CI",
+   "workflowPath": ".github/workflows/ci.yml",
+   "event": "pull_request",
+   "branch": "separate-data-repo",
+   "headSha": "8062d0fda9155a2bfb9f2959b120f20c81201a79",
+   "conclusion": "success",
+   "createdAt": "2026-10-09T11:11:21Z",
+   "startedAt": "2026-10-09T11:11:21Z",
+   "updatedAt": "2026-10-09T11:12:17Z",
+   "jobs": [
+    {
+     "id": 113792508932,
+     "name": "scripts/ci.sh",
+     "conclusion": "success",
+     "createdAt": "2026-10-09T11:11:21Z",
+     "startedAt": "2026-10-09T11:11:23Z",
+     "completedAt": "2026-10-09T11:12:17Z"
+    }
+   ]
   }
  ]
 }
