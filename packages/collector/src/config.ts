@@ -1,9 +1,14 @@
 // The Action's inputs, validated. Anything missing or odd stops the run.
 
 export interface Config {
+  /** Reads runs, jobs and artifacts of `owner/repo`. */
   token: string
   owner: string
   repo: string
+  /** Writes the data branch of `dataOwner/dataRepo`. */
+  dataToken: string
+  dataOwner: string
+  dataRepo: string
   dataBranch: string
   backfillDays: number
   maxRequests: number
@@ -11,12 +16,12 @@ export interface Config {
 }
 
 const BRANCH = /^[A-Za-z0-9][A-Za-z0-9._/-]*$/
+const REPOSITORY = /^([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)$/
 
-/** Reads and validates inputs; `defaultBranch` may never be the data branch. */
+/** Reads and validates inputs; the data repository defaults to this one. */
 export function readConfig(
   input: (name: string) => string,
-  env: Record<string, string | undefined>,
-  defaultBranch: string
+  env: Record<string, string | undefined>
 ): Config {
   const required = (name: string): string => {
     const value = input(name).trim()
@@ -39,18 +44,40 @@ export function readConfig(
     throw new Error(
       `Input data-branch is not a plain branch name: ${JSON.stringify(dataBranch)}`
     )
-  if (dataBranch === defaultBranch)
+
+  const dataRepository = input('data-repository').trim() || `${owner}/${repo}`
+  const match = REPOSITORY.exec(dataRepository)
+  if (
+    match?.[1] === undefined ||
+    match[2] === undefined ||
+    dataRepository.includes('..')
+  )
     throw new Error(
-      `Input data-branch must not be the default branch (${defaultBranch})`
+      `Input data-repository is not owner/name: ${JSON.stringify(dataRepository)}`
     )
 
+  const token = required('token')
   return {
-    token: required('token'),
+    token,
     owner,
     repo,
+    dataToken: input('data-token').trim() || token,
+    dataOwner: match[1],
+    dataRepo: match[2],
     dataBranch,
     backfillDays: count('backfill-days'),
     maxRequests: count('max-requests'),
     recentDays: count('recent-days')
   }
+}
+
+/** Throws if the data branch is the data repository's default branch. */
+export function assertNotDefaultBranch(
+  config: Config,
+  defaultBranch: string
+): void {
+  if (config.dataBranch === defaultBranch)
+    throw new Error(
+      `Input data-branch must not be the default branch (${defaultBranch}) of ${config.dataOwner}/${config.dataRepo}`
+    )
 }

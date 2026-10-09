@@ -7,12 +7,24 @@ branding:
 inputs:
   token:
     description: >-
-      Token to read runs and write the data branch. Needs `actions: read`
-      and `contents: write`.
+      Token to read runs, jobs and test report artifacts (`actions: read`).
+      Also writes the data branch unless `data-token` is set
+      (`contents: write`).
     default: ${{ github.token }}
   data-branch:
-    description: Branch the JSON data is written to. Must not be the default branch.
+    description: Branch the JSON data is written to. Must not be the data repository's default branch.
     default: gh-workflow-stats-data
+  data-repository:
+    description: >-
+      `owner/name` of the repository to write the data to. Defaults to this
+      repository. Use a separate repository when this one's default branch
+      cannot be protected.
+    default: ''
+  data-token:
+    description: >-
+      Token that can write `data-repository`. Defaults to `token`. With a
+      separate data repository, use a GitHub App token that can write only there.
+    default: ''
   backfill-days:
     description: On the first run, how many days of history to collect.
     default: '90'
